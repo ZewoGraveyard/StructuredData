@@ -24,10 +24,6 @@
 
 @_exported import Data
 
-public enum InterchangeDataError: ErrorType {
-    case IncompatibleType
-}
-
 public protocol InterchangeDataParser {
     func parse(data: Data) throws -> InterchangeData
 }
@@ -49,6 +45,10 @@ public enum InterchangeData {
     case StringValue(String)
     case ArrayValue([InterchangeData])
     case ObjectValue([String: InterchangeData])
+
+    public enum Error: ErrorType {
+        case IncompatibleType
+    }
 
     public static func from(value: Bool) -> InterchangeData {
         return .BooleanValue(value)
@@ -175,6 +175,14 @@ public enum InterchangeData {
         }
     }
 
+    public func get<T>(key: String) throws -> T {
+        if let value = self[key] {
+            return try value.get()
+        }
+
+        throw Error.IncompatibleType
+    }
+
     public func get<T>() throws -> T {
         switch self {
         case BooleanValue(let bool):
@@ -205,56 +213,56 @@ public enum InterchangeData {
         default: break
         }
 
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asBool() throws -> Bool {
         if let v = bool {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asDouble() throws -> Double {
         if let v = double {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asInt() throws -> Int {
         if let v = int {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asUInt() throws -> UInt {
         if let v = uint {
             return UInt(v)
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asString() throws -> String {
         if let v = string {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asArray() throws -> [InterchangeData] {
         if let v = array {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public func asDictionary() throws -> [String: InterchangeData] {
         if let v = dictionary {
             return v
         }
-        throw InterchangeDataError.IncompatibleType
+        throw Error.IncompatibleType
     }
 
     public subscript(index: Int) -> InterchangeData? {
