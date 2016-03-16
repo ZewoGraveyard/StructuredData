@@ -47,7 +47,7 @@ public enum InterchangeData {
     case Array([InterchangeData])
     case Dictionary([String: InterchangeData])
 
-    public enum Error: ErrorType {
+    public enum Error: ErrorProtocol {
         case IncompatibleType
     }
 
@@ -533,13 +533,13 @@ func escape(source: String) -> String {
 
     for c in source.characters {
         if let escapedSymbol = escapeMapping[c] {
-            s.appendContentsOf(escapedSymbol)
+            s.append(escapedSymbol)
         } else {
             s.append(c)
         }
     }
 
-    s.appendContentsOf("\"")
+    s.append("\"")
 
     return s
 }
