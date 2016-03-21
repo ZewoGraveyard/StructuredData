@@ -30,7 +30,7 @@ public protocol InterchangeDataParser {
 
 public extension InterchangeDataParser {
     public func parse(convertible: DataConvertible) throws -> InterchangeData {
-        return try parse(convertible.data)
+        return try parse(convertible.xData)
     }
 }
 
