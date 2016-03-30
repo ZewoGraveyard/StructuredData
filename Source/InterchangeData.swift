@@ -24,6 +24,16 @@
 
 @_exported import Data
 
+public protocol InterchangeDataInitializable {
+    init(interchangeData: InterchangeData) throws
+}
+
+public protocol InterchangeDataRepresentable {
+    var interchangeData: InterchangeData { get }
+}
+
+public protocol InterchangeDataConvertible: InterchangeDataInitializable, InterchangeDataRepresentable {}
+
 public protocol InterchangeDataParser {
     func parse(data: Data) throws -> InterchangeData
 }
