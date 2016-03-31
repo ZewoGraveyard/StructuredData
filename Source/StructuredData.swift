@@ -1,91 +1,67 @@
-// InterchangeData.swift
-//
-// The MIT License (MIT)
-//
-// Copyright (c) 2015 Zewo
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 @_exported import Data
 
-public protocol InterchangeDataInitializable {
-    init(interchangeData: InterchangeData) throws
+public protocol StructuredDataInitializable {
+    init(StructuredData: StructuredData) throws
 }
 
-public protocol InterchangeDataRepresentable {
-    var interchangeData: InterchangeData { get }
+public protocol StructuredDataRepresentable {
+    var structuredData: StructuredData { get }
 }
 
-public protocol InterchangeDataConvertible: InterchangeDataInitializable, InterchangeDataRepresentable {}
+public protocol StructuredDataConvertible: StructuredDataInitializable, StructuredDataRepresentable {}
 
-public protocol InterchangeDataParser {
-    func parse(data: Data) throws -> InterchangeData
+public protocol StructuredDataParser {
+    func parse(data: Data) throws -> StructuredData
 }
 
-public extension InterchangeDataParser {
-    public func parse(convertible: DataConvertible) throws -> InterchangeData {
+public extension StructuredDataParser {
+    public func parse(convertible: DataConvertible) throws -> StructuredData {
         return try parse(convertible.data)
     }
 }
 
-public protocol InterchangeDataSerializer {
-    func serialize(interchangeData: InterchangeData) throws -> Data
+public protocol StructuredDataSerializer {
+    func serialize(StructuredData: StructuredData) throws -> Data
 }
 
-public enum InterchangeData {
+public enum StructuredData {
     case nullValue
     case boolValue(Bool)
     case numberValue(Double)
     case stringValue(String)
     case binaryValue(Data)
-    case arrayValue([InterchangeData])
-    case dictionaryValue([String: InterchangeData])
+    case arrayValue([StructuredData])
+    case dictionaryValue([String: StructuredData])
 
     public enum Error: ErrorProtocol {
         case incompatibleType
     }
 
-    public static func from(value: Bool) -> InterchangeData {
+    public static func from(value: Bool) -> StructuredData {
         return .boolValue(value)
     }
 
-    public static func from(value: Double) -> InterchangeData {
+    public static func from(value: Double) -> StructuredData {
         return .numberValue(value)
     }
 
-    public static func from(value: Int) -> InterchangeData {
+    public static func from(value: Int) -> StructuredData {
         return .numberValue(Double(value))
     }
 
-    public static func from(value: String) -> InterchangeData {
+    public static func from(value: String) -> StructuredData {
         return .stringValue(value)
     }
 
-    public static func from(value: Data) -> InterchangeData {
+    public static func from(value: Data) -> StructuredData {
         return .binaryValue(value)
     }
 
-    public static func from(value: [InterchangeData]) -> InterchangeData {
+    public static func from(value: [StructuredData]) -> StructuredData {
         return .arrayValue(value)
     }
 
-    public static func from(value: [String: InterchangeData]) -> InterchangeData {
+    public static func from(value: [String: StructuredData]) -> StructuredData {
         return .dictionaryValue(value)
     }
 
@@ -173,14 +149,14 @@ public enum InterchangeData {
         }
     }
 
-    public var array: [InterchangeData]? {
+    public var array: [StructuredData]? {
         switch self {
         case .arrayValue(let array): return array
         default: return nil
         }
     }
 
-    public var dictionary: [String: InterchangeData]? {
+    public var dictionary: [String: StructuredData]? {
         switch self {
         case .dictionaryValue(let dictionary): return dictionary
         default: return nil
@@ -294,21 +270,21 @@ public enum InterchangeData {
         throw Error.incompatibleType
     }
 
-    public func asArray() throws -> [InterchangeData] {
+    public func asArray() throws -> [StructuredData] {
         if let array = array {
             return array
         }
         throw Error.incompatibleType
     }
 
-    public func asDictionary() throws -> [String: InterchangeData] {
+    public func asDictionary() throws -> [String: StructuredData] {
         if let dictionary = dictionary {
             return dictionary
         }
         throw Error.incompatibleType
     }
 
-    public subscript(index: Int) -> InterchangeData? {
+    public subscript(index: Int) -> StructuredData? {
         get {
             if let array = array where index > 0  && index < array.count {
                 return array[index]
@@ -316,13 +292,13 @@ public enum InterchangeData {
             return nil
         }
 
-        set(interchangeData) {
+        set(structuredData) {
             switch self {
             case .arrayValue(let array):
                 var array = array
                 if index > 0 && index < array.count {
-                    if let interchangeData = interchangeData {
-                        array[index] = interchangeData
+                    if let structuredData = structuredData {
+                        array[index] = structuredData
                     } else {
                         array[index] = .nullValue
                     }
@@ -333,16 +309,16 @@ public enum InterchangeData {
         }
     }
 
-    public subscript(key: String) -> InterchangeData? {
+    public subscript(key: String) -> StructuredData? {
         get {
             return dictionary?[key]
         }
 
-        set(interchangeData) {
+        set(structuredData) {
             switch self {
             case .dictionaryValue(let dictionary):
                 var dictionary = dictionary
-                dictionary[key] = interchangeData
+                dictionary[key] = structuredData
                 self = .dictionaryValue(dictionary)
             default: break
             }
@@ -350,9 +326,9 @@ public enum InterchangeData {
     }
 }
 
-extension InterchangeData: Equatable {}
+extension StructuredData: Equatable {}
 
-public func ==(lhs: InterchangeData, rhs: InterchangeData) -> Bool {
+public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
     switch lhs {
     case .nullValue:
         switch rhs {
@@ -392,31 +368,31 @@ public func ==(lhs: InterchangeData, rhs: InterchangeData) -> Bool {
     }
 }
 
-extension InterchangeData: NilLiteralConvertible {
+extension StructuredData: NilLiteralConvertible {
     public init(nilLiteral value: Void) {
         self = .nullValue
     }
 }
 
-extension InterchangeData: BooleanLiteralConvertible {
+extension StructuredData: BooleanLiteralConvertible {
     public init(booleanLiteral value: BooleanLiteralType) {
         self = .boolValue(value)
     }
 }
 
-extension InterchangeData: IntegerLiteralConvertible {
+extension StructuredData: IntegerLiteralConvertible {
     public init(integerLiteral value: IntegerLiteralType) {
         self = .numberValue(Double(value))
     }
 }
 
-extension InterchangeData: FloatLiteralConvertible {
+extension StructuredData: FloatLiteralConvertible {
     public init(floatLiteral value: FloatLiteralType) {
         self = .numberValue(Double(value))
     }
 }
 
-extension InterchangeData: StringLiteralConvertible {
+extension StructuredData: StringLiteralConvertible {
     public init(unicodeScalarLiteral value: String) {
         self = .stringValue(value)
     }
@@ -430,8 +406,8 @@ extension InterchangeData: StringLiteralConvertible {
     }
 }
 
-extension InterchangeData: StringInterpolationConvertible {
-    public init(stringInterpolation strings: InterchangeData...) {
+extension StructuredData: StringInterpolationConvertible {
+    public init(stringInterpolation strings: StructuredData...) {
         var string = ""
 
         for s in strings {
@@ -446,15 +422,15 @@ extension InterchangeData: StringInterpolationConvertible {
     }
 }
 
-extension InterchangeData: ArrayLiteralConvertible {
-    public init(arrayLiteral elements: InterchangeData...) {
+extension StructuredData: ArrayLiteralConvertible {
+    public init(arrayLiteral elements: StructuredData...) {
         self = .arrayValue(elements)
     }
 }
 
-extension InterchangeData: DictionaryLiteralConvertible {
-    public init(dictionaryLiteral elements: (String, InterchangeData)...) {
-        var dictionary = [String: InterchangeData](minimumCapacity: elements.count)
+extension StructuredData: DictionaryLiteralConvertible {
+    public init(dictionaryLiteral elements: (String, StructuredData)...) {
+        var dictionary = [String: StructuredData](minimumCapacity: elements.count)
 
         for pair in elements {
             dictionary[pair.0] = pair.1
@@ -464,11 +440,11 @@ extension InterchangeData: DictionaryLiteralConvertible {
     }
 }
 
-extension InterchangeData: CustomStringConvertible {
+extension StructuredData: CustomStringConvertible {
     public var description: String {
         var indentLevel = 0
 
-        func serialize(data: InterchangeData) -> String {
+        func serialize(data: StructuredData) -> String {
             switch data {
             case .nullValue: return "null"
             case .boolValue(let b): return b ? "true" : "false"
@@ -488,7 +464,7 @@ extension InterchangeData: CustomStringConvertible {
             }
         }
 
-        func serializeArray(a: [InterchangeData]) -> String {
+        func serializeArray(a: [StructuredData]) -> String {
             var s = "["
             indentLevel += 1
 
@@ -506,7 +482,7 @@ extension InterchangeData: CustomStringConvertible {
             return s + "\n" + indent() + "]"
         }
 
-        func serializeObject(o: [String: InterchangeData]) -> String {
+        func serializeObject(o: [String: StructuredData]) -> String {
             var s = "{"
             indentLevel += 1
             var i = 0
