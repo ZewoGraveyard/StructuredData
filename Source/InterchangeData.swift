@@ -474,7 +474,7 @@ extension InterchangeData: CustomStringConvertible {
             case .boolValue(let b): return b ? "true" : "false"
             case .numberValue(let n): return serializeNumber(n)
             case .stringValue(let s): return escape(s)
-            case .binaryValue(let d): return escape(d.hexDescription)
+            case .binaryValue(let d): return escape(d.hexadecimalDescription)
             case .arrayValue(let a): return serializeArray(a)
             case .dictionaryValue(let o): return serializeObject(o)
             }
