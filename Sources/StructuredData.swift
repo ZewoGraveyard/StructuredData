@@ -1,7 +1,7 @@
 @_exported import Data
 
 public protocol StructuredDataInitializable {
-    init(StructuredData: StructuredData) throws
+    init(structuredData: StructuredData) throws
 }
 
 public protocol StructuredDataRepresentable {
@@ -21,7 +21,7 @@ public extension StructuredDataParser {
 }
 
 public protocol StructuredDataSerializer {
-    func serialize(StructuredData: StructuredData) throws -> Data
+    func serialize(structuredData: StructuredData) throws -> Data
 }
 
 public enum StructuredData {
