@@ -1,4 +1,4 @@
-@_exported import Data
+@_exported import C7
 
 public protocol StructuredDataInitializable {
     init(structuredData: StructuredData) throws
