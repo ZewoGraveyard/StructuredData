@@ -444,7 +444,7 @@ extension StructuredData: CustomStringConvertible {
     public var description: String {
         var indentLevel = 0
 
-        func serialize(data: StructuredData) -> String {
+        func serialize(_ data: StructuredData) -> String {
             switch data {
             case .nullValue: return "null"
             case .boolValue(let b): return b ? "true" : "false"
@@ -471,7 +471,7 @@ extension StructuredData: CustomStringConvertible {
             for i in 0 ..< array.count {
                 s += "\n"
                 s += indent()
-                s += serialize(data: array[i])
+                s += serialize(array[i])
 
                 if i != (array.count - 1) {
                     s += ","
@@ -490,7 +490,7 @@ extension StructuredData: CustomStringConvertible {
             for (key, value) in object {
                 s += "\n"
                 s += indent()
-                s += "\(escape(key)): \(serialize(data: value))"
+                s += "\(escape(key)): \(serialize(value))"
 
                 if i != (object.count - 1) {
                     s += ","
@@ -512,7 +512,7 @@ extension StructuredData: CustomStringConvertible {
             return s
         }
 
-        return serialize(data: self)
+        return serialize(self)
     }
 }
 
