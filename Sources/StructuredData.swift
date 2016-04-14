@@ -182,7 +182,7 @@ public enum StructuredData {
         }
     }
 
-    public func get<T>(key: String) throws -> T {
+    public func get<T>(_ key: String) throws -> T {
         if let value = self[key] {
             return try value.get()
         }
