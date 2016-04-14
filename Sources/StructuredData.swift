@@ -37,31 +37,31 @@ public enum StructuredData {
         case incompatibleType
     }
 
-    public static func from(value: Bool) -> StructuredData {
+    public static func from(_ value: Bool) -> StructuredData {
         return .boolValue(value)
     }
 
-    public static func from(value: Double) -> StructuredData {
+    public static func from(_ value: Double) -> StructuredData {
         return .numberValue(value)
     }
 
-    public static func from(value: Int) -> StructuredData {
+    public static func from(_ value: Int) -> StructuredData {
         return .numberValue(Double(value))
     }
 
-    public static func from(value: String) -> StructuredData {
+    public static func from(_ value: String) -> StructuredData {
         return .stringValue(value)
     }
 
-    public static func from(value: Data) -> StructuredData {
+    public static func from(_ value: Data) -> StructuredData {
         return .binaryValue(value)
     }
 
-    public static func from(value: [StructuredData]) -> StructuredData {
+    public static func from(_ value: [StructuredData]) -> StructuredData {
         return .arrayValue(value)
     }
 
-    public static func from(value: [String: StructuredData]) -> StructuredData {
+    public static func from(_ value: [String: StructuredData]) -> StructuredData {
         return .dictionaryValue(value)
     }
 
