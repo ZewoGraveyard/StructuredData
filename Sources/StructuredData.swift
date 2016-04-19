@@ -11,17 +11,17 @@ public protocol StructuredDataRepresentable {
 public protocol StructuredDataConvertible: StructuredDataInitializable, StructuredDataRepresentable {}
 
 public protocol StructuredDataParser {
-    func parse(data: Data) throws -> StructuredData
+    func parse(_ data: Data) throws -> StructuredData
 }
 
 public extension StructuredDataParser {
-    public func parse(convertible: DataConvertible) throws -> StructuredData {
+    public func parse(_ convertible: DataConvertible) throws -> StructuredData {
         return try parse(convertible.data)
     }
 }
 
 public protocol StructuredDataSerializer {
-    func serialize(structuredData: StructuredData) throws -> Data
+    func serialize(_ structuredData: StructuredData) throws -> Data
 }
 
 public enum StructuredData {
@@ -37,31 +37,31 @@ public enum StructuredData {
         case incompatibleType
     }
 
-    public static func from(value: Bool) -> StructuredData {
+    public static func from(_ value: Bool) -> StructuredData {
         return .boolValue(value)
     }
 
-    public static func from(value: Double) -> StructuredData {
+    public static func from(_ value: Double) -> StructuredData {
         return .numberValue(value)
     }
 
-    public static func from(value: Int) -> StructuredData {
+    public static func from(_ value: Int) -> StructuredData {
         return .numberValue(Double(value))
     }
 
-    public static func from(value: String) -> StructuredData {
+    public static func from(_ value: String) -> StructuredData {
         return .stringValue(value)
     }
 
-    public static func from(value: Data) -> StructuredData {
+    public static func from(_ value: Data) -> StructuredData {
         return .binaryValue(value)
     }
 
-    public static func from(value: [StructuredData]) -> StructuredData {
+    public static func from(_ value: [StructuredData]) -> StructuredData {
         return .arrayValue(value)
     }
 
-    public static func from(value: [String: StructuredData]) -> StructuredData {
+    public static func from(_ value: [String: StructuredData]) -> StructuredData {
         return .dictionaryValue(value)
     }
 
@@ -182,7 +182,7 @@ public enum StructuredData {
         }
     }
 
-    public func get<T>(key: String) throws -> T {
+    public func get<T>(_ key: String) throws -> T {
         if let value = self[key] {
             return try value.get()
         }
@@ -444,36 +444,36 @@ extension StructuredData: CustomStringConvertible {
     public var description: String {
         var indentLevel = 0
 
-        func serialize(data: StructuredData) -> String {
+        func serialize(_ data: StructuredData) -> String {
             switch data {
             case .nullValue: return "null"
             case .boolValue(let b): return b ? "true" : "false"
-            case .numberValue(let n): return serializeNumber(n)
+            case .numberValue(let n): return serialize(number: n)
             case .stringValue(let s): return escape(s)
             case .binaryValue(let d): return escape(d.hexadecimalDescription)
-            case .arrayValue(let a): return serializeArray(a)
-            case .dictionaryValue(let o): return serializeObject(o)
+            case .arrayValue(let a): return serialize(array: a)
+            case .dictionaryValue(let o): return serialize(object: o)
             }
         }
 
-        func serializeNumber(n: Double) -> String {
-            if n == Double(Int64(n)) {
-                return Int64(n).description
+        func serialize(number: Double) -> String {
+            if number == Double(Int64(number)) {
+                return Int64(number).description
             } else {
-                return n.description
+                return number.description
             }
         }
 
-        func serializeArray(a: [StructuredData]) -> String {
+        func serialize(array: [StructuredData]) -> String {
             var s = "["
             indentLevel += 1
 
-            for i in 0 ..< a.count {
+            for i in 0 ..< array.count {
                 s += "\n"
                 s += indent()
-                s += serialize(a[i])
+                s += serialize(array[i])
 
-                if i != (a.count - 1) {
+                if i != (array.count - 1) {
                     s += ","
                 }
             }
@@ -482,17 +482,17 @@ extension StructuredData: CustomStringConvertible {
             return s + "\n" + indent() + "]"
         }
 
-        func serializeObject(o: [String: StructuredData]) -> String {
+        func serialize(object: [String: StructuredData]) -> String {
             var s = "{"
             indentLevel += 1
             var i = 0
 
-            for (key, value) in o {
+            for (key, value) in object {
                 s += "\n"
                 s += indent()
                 s += "\(escape(key)): \(serialize(value))"
 
-                if i != (o.count - 1) {
+                if i != (object.count - 1) {
                     s += ","
                 }
                 i += 1
@@ -516,7 +516,7 @@ extension StructuredData: CustomStringConvertible {
     }
 }
 
-func escape(source: String) -> String {
+func escape(_ source: String) -> String {
     var s = "\""
 
     for c in source.characters {
