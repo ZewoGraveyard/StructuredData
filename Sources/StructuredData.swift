@@ -79,7 +79,7 @@ public enum StructuredData {
         }
         return false
     }
-    
+
     public var isInteger: Bool {
         if case .integerValue = self {
             return true
