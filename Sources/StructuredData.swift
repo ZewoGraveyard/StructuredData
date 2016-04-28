@@ -222,14 +222,11 @@ public enum StructuredData {
             case .arrayValue(let array):
                 var array = array
                 if index > 0 && index < array.count {
-                    if let structuredData = structuredData {
-                        array[index] = structuredData
-                    } else {
-                        array[index] = .nullValue
-                    }
+                    array[index] = structuredData ?? .nullValue
                     self = .arrayValue(array)
                 }
-            default: break
+            default:
+                 break
             }
         }
     }
