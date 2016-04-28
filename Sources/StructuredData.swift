@@ -211,59 +211,35 @@ public enum StructuredData {
     }
 
     public func asBool() throws -> Bool {
-        if let bool = bool {
-            return bool
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asDouble() throws -> Double {
-        if let double = double {
-            return double
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asInt() throws -> Int {
-        if let int = int {
-            return int
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asUInt() throws -> UInt {
-        if let uint = uint {
-            return UInt(uint)
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asString() throws -> String {
-        if let string = string {
-            return string
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asBinary() throws -> Data {
-        if let binary = binary {
-            return binary
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asArray() throws -> [StructuredData] {
-        if let array = array {
-            return array
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asDictionary() throws -> [String: StructuredData] {
-        if let dictionary = dictionary {
-            return dictionary
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public subscript(index: Int) -> StructuredData? {
