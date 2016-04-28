@@ -272,42 +272,30 @@ public enum StructuredData {
 extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
-    switch lhs {
-    case .nullValue:
-        switch rhs {
-        case .nullValue: return true
-        default: return false
-        }
-    case .boolValue(let lhsValue):
-        switch rhs {
-        case .boolValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .stringValue(let lhsValue):
-        switch rhs {
-        case .stringValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .binaryValue(let lhsValue):
-        switch rhs {
-        case .binaryValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .numberValue(let lhsValue):
-        switch rhs {
-        case .numberValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .arrayValue(let lhsValue):
-        switch rhs {
-        case .arrayValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .dictionaryValue(let lhsValue):
-        switch rhs {
-        case .dictionaryValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
+    switch (lhs, rhs) {
+        case (.nullValue, .nullValue):
+            return true
+
+        case (.boolValue(let l), .boolValue(let r)) where l == r:
+            return true
+
+        case (.stringValue(let l), .stringValue(let r)) where l == r:
+            return true
+
+        case (.binaryValue(let l), .binaryValue(let r)) where l == r:
+            return true
+
+        case (.numberValue(let l), .numberValue(let r)) where l == r:
+            return true
+
+        case (.arrayValue(let l), .arrayValue(let r)) where l == r:
+            return true
+
+        case (.dictionaryValue(let l), .dictionaryValue(let r)) where l == r:
+            return true
+
+        default:
+            return false
     }
 }
 
