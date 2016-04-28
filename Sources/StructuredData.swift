@@ -373,7 +373,7 @@ extension StructuredData: CustomStringConvertible {
         func serialize(_ data: StructuredData) -> String {
             switch data {
             case .nullValue: return "null"
-            case .boolValue(let b): return b ? "true" : "false"
+            case .boolValue(let b): return String(b)
             case .numberValue(let n): return serialize(number: n)
             case .stringValue(let s): return escape(s)
             case .binaryValue(let d): return escape(d.hexadecimalDescription)
