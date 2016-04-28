@@ -66,45 +66,45 @@ public enum StructuredData {
     }
 
     public var isBool: Bool {
-        switch self {
-        case .boolValue: return true
-        default: return false
+        if case .boolValue = self {
+            return true
         }
+        return false
     }
 
     public var isNumber: Bool {
-        switch self {
-        case .numberValue: return true
-        default: return false
+        if case .numberValue = self {
+            return true
         }
+        return false
     }
 
     public var isString: Bool {
-        switch self {
-        case .stringValue: return true
-        default: return false
+        if case .stringValue = self {
+            return true
         }
+        return false
     }
 
     public var isBinary: Bool {
-        switch self {
-        case .binaryValue: return true
-        default: return false
+        if case .binaryValue = self {
+            return true
         }
+        return false
     }
 
     public var isArray: Bool {
-        switch self {
-        case .arrayValue: return true
-        default: return false
+        if case .arrayValue = self {
+            return true
         }
+        return false
     }
 
     public var isDictionary: Bool {
-        switch self {
-        case .dictionaryValue: return true
-        default: return false
+        if case .dictionaryValue = self {
+            return true
         }
+        return false
     }
 
     public var bool: Bool? {
