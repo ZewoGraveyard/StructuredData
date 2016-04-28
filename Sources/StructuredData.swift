@@ -108,59 +108,53 @@ public enum StructuredData {
     }
 
     public var bool: Bool? {
-        switch self {
-        case .boolValue(let b): return b
-        default: return nil
+        if case .boolValue(let b) = self {
+            return b
         }
+        return nil
     }
 
     public var double: Double? {
-        switch self {
-        case .numberValue(let n): return n
-        default: return nil
+        if case .numberValue(let d) = self {
+            return d
         }
+        return nil
     }
 
     public var int: Int? {
-        if let v = double {
-            return Int(v)
-        }
-        return nil
+        return double.flatMap { Int($0) }
     }
 
     public var uint: UInt? {
-        if let v = double {
-            return UInt(v)
+        return double.flatMap { UInt($0) }
+    }
+
+    public var string: String? {
+        if case .stringValue(let s) = self {
+            return s
         }
         return nil
     }
 
-    public var string: String? {
-        switch self {
-        case .stringValue(let s): return s
-        default: return nil
-        }
-    }
-
     public var binary: Data? {
-        switch self {
-        case .binaryValue(let d): return d
-        default: return nil
+        if case .binaryValue(let d) = self {
+            return d
         }
+        return nil
     }
 
     public var array: [StructuredData]? {
-        switch self {
-        case .arrayValue(let array): return array
-        default: return nil
+        if case .arrayValue(let a) = self {
+            return a
         }
+        return nil
     }
 
     public var dictionary: [String: StructuredData]? {
-        switch self {
-        case .dictionaryValue(let dictionary): return dictionary
-        default: return nil
+        if case .dictionaryValue(let dic) = self {
+            return dic
         }
+        return nil
     }
 
     public func get<T>() -> T? {
