@@ -108,17 +108,11 @@ public enum StructuredData {
     }
 
     public var bool: Bool? {
-        if case .boolValue(let b) = self {
-            return b
-        }
-        return nil
+        return try? get()
     }
 
     public var double: Double? {
-        if case .numberValue(let d) = self {
-            return d
-        }
-        return nil
+        return try? get()
     }
 
     public var int: Int? {
@@ -130,31 +124,19 @@ public enum StructuredData {
     }
 
     public var string: String? {
-        if case .stringValue(let s) = self {
-            return s
-        }
-        return nil
+        return try? get()
     }
 
     public var binary: Data? {
-        if case .binaryValue(let d) = self {
-            return d
-        }
-        return nil
+        return try? get()
     }
 
     public var array: [StructuredData]? {
-        if case .arrayValue(let a) = self {
-            return a
-        }
-        return nil
+        return try? get()
     }
 
     public var dictionary: [String: StructuredData]? {
-        if case .dictionaryValue(let dic) = self {
-            return dic
-        }
-        return nil
+        return try? get()
     }
 
     public func get<T>() -> T? {
