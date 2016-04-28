@@ -318,8 +318,8 @@ extension StructuredData: StringLiteralConvertible {
 
 extension StructuredData: StringInterpolationConvertible {
     public init(stringInterpolation strings: StructuredData...) {
-        let s = strings.reduce("") { $0 + ($1.string ?? "") }
-        self = .stringValue(s)
+        let string = strings.reduce("") { $0 + ($1.string ?? "") }
+        self = .stringValue(string)
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
