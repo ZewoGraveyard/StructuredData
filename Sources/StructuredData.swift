@@ -158,22 +158,7 @@ public enum StructuredData {
     }
 
     public func get<T>() -> T? {
-        switch self {
-        case nullValue:
-            return nil
-        case boolValue(let bool):
-            return bool as? T
-        case numberValue(let number):
-            return number as? T
-        case stringValue(let string):
-            return string as? T
-        case binaryValue(let binary):
-            return binary as? T
-        case arrayValue(let array):
-            return array as? T
-        case dictionaryValue(let dictionary):
-            return dictionary as? T
-        }
+        return try? get()
     }
 
     public func get<T>(_ key: String) throws -> T {
