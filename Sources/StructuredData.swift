@@ -186,35 +186,23 @@ public enum StructuredData {
 
     public func get<T>() throws -> T {
         switch self {
-        case boolValue(let boolean):
-            if let value = boolean as? T {
-                return value
-            }
+        case boolValue(let value as T):
+            return value
 
-        case numberValue(let number):
-            if let value = number as? T {
-                return value
-            }
+        case numberValue(let value as T):
+            return value
 
-        case stringValue(let string):
-            if let value = string as? T {
-                return value
-            }
+        case stringValue(let value as T):
+            return value
 
-        case .binaryValue(let binary):
-            if let value = binary as? T {
-                return value
-            }
+        case .binaryValue(let value as T):
+            return value
 
-        case arrayValue(let array):
-            if let value = array as? T {
-                return value
-            }
+        case arrayValue(let value as T):
+            return value
 
-        case dictionaryValue(let dictionary):
-            if let value = dictionary as? T {
-                return value
-            }
+        case dictionaryValue(let value as T):
+            return value
 
         default: break
         }
