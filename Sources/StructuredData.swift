@@ -358,8 +358,8 @@ extension StructuredData: DictionaryLiteralConvertible {
     public init(dictionaryLiteral elements: (String, StructuredData)...) {
         var dictionary = [String: StructuredData](minimumCapacity: elements.count)
 
-        for pair in elements {
-            dictionary[pair.0] = pair.1
+        for (key, value) in elements {
+            dictionary[key] = value
         }
 
         self = .dictionaryValue(dictionary)
