@@ -211,17 +211,17 @@ public enum StructuredData {
 
     public subscript(index: Int) -> StructuredData? {
         get {
-            if let array = array where index > 0  && index < array.count {
-                return array[index]
+            guard let array = array where index >= 0 && index < array.count else {
+                return nil
             }
-            return nil
+            return array[index]
         }
 
         set(structuredData) {
             switch self {
             case .arrayValue(let array):
                 var array = array
-                if index > 0 && index < array.count {
+                if index >= 0 && index < array.count {
                     array[index] = structuredData ?? .nullValue
                     self = .arrayValue(array)
                 }
