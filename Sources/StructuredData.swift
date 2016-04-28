@@ -116,11 +116,11 @@ public enum StructuredData {
     }
 
     public var int: Int? {
-        return double.flatMap { Int($0) }
+        return double.flatMap({Int($0)})
     }
 
     public var uint: UInt? {
-        return double.flatMap { UInt($0) }
+        return double.flatMap({UInt($0)})
     }
 
     public var string: String? {
