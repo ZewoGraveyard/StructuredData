@@ -66,120 +66,107 @@ public enum StructuredData {
     }
 
     public var isBool: Bool {
-        switch self {
-        case .boolValue: return true
-        default: return false
+        if case .boolValue = self {
+            return true
         }
+        return false
     }
 
     public var isNumber: Bool {
-        switch self {
-        case .numberValue: return true
-        default: return false
+        if case .numberValue = self {
+            return true
         }
+        return false
     }
 
     public var isString: Bool {
-        switch self {
-        case .stringValue: return true
-        default: return false
+        if case .stringValue = self {
+            return true
         }
+        return false
     }
 
     public var isBinary: Bool {
-        switch self {
-        case .binaryValue: return true
-        default: return false
+        if case .binaryValue = self {
+            return true
         }
+        return false
     }
 
     public var isArray: Bool {
-        switch self {
-        case .arrayValue: return true
-        default: return false
+        if case .arrayValue = self {
+            return true
         }
+        return false
     }
 
     public var isDictionary: Bool {
-        switch self {
-        case .dictionaryValue: return true
-        default: return false
+        if case .dictionaryValue = self {
+            return true
         }
+        return false
     }
 
     public var bool: Bool? {
-        switch self {
-        case .boolValue(let b): return b
-        default: return nil
-        }
+        return try? get()
     }
 
     public var double: Double? {
-        switch self {
-        case .numberValue(let n): return n
-        default: return nil
-        }
+        return try? get()
     }
 
     public var int: Int? {
-        if let v = double {
-            return Int(v)
-        }
-        return nil
+        return double.flatMap({Int($0)})
     }
 
     public var uint: UInt? {
-        if let v = double {
-            return UInt(v)
-        }
-        return nil
+        return double.flatMap({UInt($0)})
     }
 
     public var string: String? {
-        switch self {
-        case .stringValue(let s): return s
-        default: return nil
-        }
+        return try? get()
     }
 
     public var binary: Data? {
-        switch self {
-        case .binaryValue(let d): return d
-        default: return nil
-        }
+        return try? get()
     }
 
     public var array: [StructuredData]? {
-        switch self {
-        case .arrayValue(let array): return array
-        default: return nil
-        }
+        return try? get()
     }
 
     public var dictionary: [String: StructuredData]? {
-        switch self {
-        case .dictionaryValue(let dictionary): return dictionary
-        default: return nil
-        }
+        return try? get()
     }
 
     public func get<T>() -> T? {
+        return try? get()
+    }
+
+    public func get<T>() throws -> T {
         switch self {
-        case nullValue:
-            return nil
-        case boolValue(let bool):
-            return bool as? T
-        case numberValue(let number):
-            return number as? T
-        case stringValue(let string):
-            return string as? T
-        case binaryValue(let binary):
-            return binary as? T
-        case arrayValue(let array):
-            return array as? T
-        case dictionaryValue(let dictionary):
-            return dictionary as? T
+        case boolValue(let value as T):
+            return value
+
+        case numberValue(let value as T):
+            return value
+
+        case stringValue(let value as T):
+            return value
+
+        case .binaryValue(let value as T):
+            return value
+
+        case arrayValue(let value as T):
+            return value
+
+        case dictionaryValue(let value as T):
+            return value
+
+        default: break
         }
+
+        throw Error.incompatibleType
     }
 
     public func get<T>(_ key: String) throws -> T {
@@ -190,56 +177,12 @@ public enum StructuredData {
         throw Error.incompatibleType
     }
 
-    public func get<T>() throws -> T {
-        switch self {
-        case boolValue(let boolean):
-            if let value = boolean as? T {
-                return value
-            }
-
-        case numberValue(let number):
-            if let value = number as? T {
-                return value
-            }
-
-        case stringValue(let string):
-            if let value = string as? T {
-                return value
-            }
-
-        case .binaryValue(let binary):
-            if let value = binary as? T {
-                return value
-            }
-
-        case arrayValue(let array):
-            if let value = array as? T {
-                return value
-            }
-
-        case dictionaryValue(let dictionary):
-            if let value = dictionary as? T {
-                return value
-            }
-
-        default: break
-        }
-
-        throw Error.incompatibleType
-    }
-
     public func asBool() throws -> Bool {
-        if let bool = bool {
-            return bool
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asDouble() throws -> Double {
-        if let double = double {
-            return double
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asInt() throws -> Int {
@@ -257,54 +200,39 @@ public enum StructuredData {
     }
 
     public func asString() throws -> String {
-        if let string = string {
-            return string
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asBinary() throws -> Data {
-        if let binary = binary {
-            return binary
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asArray() throws -> [StructuredData] {
-        if let array = array {
-            return array
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asDictionary() throws -> [String: StructuredData] {
-        if let dictionary = dictionary {
-            return dictionary
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public subscript(index: Int) -> StructuredData? {
         get {
-            if let array = array where index > 0  && index < array.count {
-                return array[index]
+            guard let array = array where index >= 0 && index < array.count else {
+                return nil
             }
-            return nil
+            return array[index]
         }
 
         set(structuredData) {
             switch self {
             case .arrayValue(let array):
                 var array = array
-                if index > 0 && index < array.count {
-                    if let structuredData = structuredData {
-                        array[index] = structuredData
-                    } else {
-                        array[index] = .nullValue
-                    }
+                if index >= 0 && index < array.count {
+                    array[index] = structuredData ?? .nullValue
                     self = .arrayValue(array)
                 }
-            default: break
+            default:
+                 break
             }
         }
     }
@@ -329,42 +257,30 @@ public enum StructuredData {
 extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
-    switch lhs {
-    case .nullValue:
-        switch rhs {
-        case .nullValue: return true
-        default: return false
-        }
-    case .boolValue(let lhsValue):
-        switch rhs {
-        case .boolValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .stringValue(let lhsValue):
-        switch rhs {
-        case .stringValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .binaryValue(let lhsValue):
-        switch rhs {
-        case .binaryValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .numberValue(let lhsValue):
-        switch rhs {
-        case .numberValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .arrayValue(let lhsValue):
-        switch rhs {
-        case .arrayValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
-    case .dictionaryValue(let lhsValue):
-        switch rhs {
-        case .dictionaryValue(let rhsValue): return lhsValue == rhsValue
-        default: return false
-        }
+    switch (lhs, rhs) {
+        case (.nullValue, .nullValue):
+            return true
+
+        case (.boolValue(let l), .boolValue(let r)) where l == r:
+            return true
+
+        case (.stringValue(let l), .stringValue(let r)) where l == r:
+            return true
+
+        case (.binaryValue(let l), .binaryValue(let r)) where l == r:
+            return true
+
+        case (.numberValue(let l), .numberValue(let r)) where l == r:
+            return true
+
+        case (.arrayValue(let l), .arrayValue(let r)) where l == r:
+            return true
+
+        case (.dictionaryValue(let l), .dictionaryValue(let r)) where l == r:
+            return true
+
+        default:
+            return false
     }
 }
 
@@ -408,13 +324,8 @@ extension StructuredData: StringLiteralConvertible {
 
 extension StructuredData: StringInterpolationConvertible {
     public init(stringInterpolation strings: StructuredData...) {
-        var string = ""
-
-        for s in strings {
-            string += s.string!
-        }
-
-        self = .stringValue(String(string))
+        let string = strings.reduce("") { $0 + ($1.string ?? "") }
+        self = .stringValue(string)
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
@@ -432,8 +343,8 @@ extension StructuredData: DictionaryLiteralConvertible {
     public init(dictionaryLiteral elements: (String, StructuredData)...) {
         var dictionary = [String: StructuredData](minimumCapacity: elements.count)
 
-        for pair in elements {
-            dictionary[pair.0] = pair.1
+        for (key, value) in elements {
+            dictionary[key] = value
         }
 
         self = .dictionaryValue(dictionary)
@@ -447,7 +358,7 @@ extension StructuredData: CustomStringConvertible {
         func serialize(_ data: StructuredData) -> String {
             switch data {
             case .nullValue: return "null"
-            case .boolValue(let b): return b ? "true" : "false"
+            case .boolValue(let b): return String(b)
             case .numberValue(let n): return serialize(number: n)
             case .stringValue(let s): return escape(s)
             case .binaryValue(let d): return escape(d.hexadecimalDescription)
@@ -503,13 +414,8 @@ extension StructuredData: CustomStringConvertible {
         }
 
         func indent() -> String {
-            var s = ""
-
-            for _ in 0 ..< indentLevel {
-                s += "    "
-            }
-
-            return s
+            let spaceCount = indentLevel * 4
+            return String(repeating: Character(" "), count: spaceCount)
         }
 
         return serialize(self)
