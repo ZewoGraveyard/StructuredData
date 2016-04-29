@@ -4,7 +4,7 @@ import XCTest
 @testable import StructuredDataTestSuite
 
 XCTMain([
-    testCase(StructuredDataTests.allTests)
+    testCase(StructuredDataTests.allTests),
 ])
 
 #endif
