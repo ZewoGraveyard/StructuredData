@@ -6,7 +6,7 @@ let intData: StructuredData = .integerValue(1)
 let doubleData: StructuredData = .doubleValue(1.5)
 let stringData: StructuredData = .stringValue("string")
 let arrayData: StructuredData = .arrayValue([true, 1.5])
-let dictData: StructuredData = .dictionaryValue(["bool": false, "dobule": 1.5])
+let dictData: StructuredData = .dictionaryValue(["bool": false, "double": 1.5])
 
 
 class StructuredDataTests: XCTestCase {
@@ -29,7 +29,7 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertEqual(StructuredData.from(1.5), doubleData)
 		XCTAssertEqual(StructuredData.from("string"), stringData)
 		XCTAssertEqual(StructuredData.from([true, 1.5]), arrayData)
-		XCTAssertEqual(StructuredData.from(["bool": false, "dobule": 1.5]), dictData)
+		XCTAssertEqual(StructuredData.from(["bool": false, "double": 1.5]), dictData)
 	}
 
 	func testCheckType() {
@@ -60,7 +60,7 @@ class StructuredDataTests: XCTestCase {
 		let ndict = dictData.dictionary
 		XCTAssertNotNil(ndict)
 		if let ndict = ndict {
-			XCTAssertEqual(ndict, ["bool": false, "dobule": 1.5])
+			XCTAssertEqual(ndict, ["bool": false, "double": 1.5])
 		}
 
 		XCTAssertNil(boolData.int)
@@ -107,7 +107,7 @@ class StructuredDataTests: XCTestCase {
 		let ndict = try? dictData.asDictionary()
 		XCTAssertNotNil(ndict)
 		if let ndict = ndict {
-			XCTAssertEqual(ndict, ["bool": false, "dobule": 1.5])
+			XCTAssertEqual(ndict, ["bool": false, "double": 1.5])
 		}
 		
 		XCTAssertNil(try? boolData.asInt())
@@ -117,7 +117,7 @@ class StructuredDataTests: XCTestCase {
 
 	func testSubscriptByIndex() {
 		XCTAssertEqual(arrayData[0], .boolValue(true))
-		XCTAssertEqual(arrayData[1], .integerValue(1))
+		XCTAssertEqual(arrayData[1], .doubleValue(1.5))
 		XCTAssertEqual(boolData[0], nil)
 
 		var array = arrayData
