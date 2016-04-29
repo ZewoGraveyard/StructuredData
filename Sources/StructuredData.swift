@@ -358,11 +358,11 @@ extension StructuredData {
         }
 
         switch self {
-        case .int(let value):
-            return Double(value)
-
         case .bool(let value):
             return value ? 1.0 : 0.0
+
+        case .int(let value):
+            return Double(value)
 
         case .double(let value):
             return value
@@ -374,7 +374,7 @@ extension StructuredData {
             throw Error.incompatibleType
 
         case .null:
-            return 0.0
+                return 0
 
         default:
             throw Error.incompatibleType
