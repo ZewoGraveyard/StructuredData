@@ -388,7 +388,7 @@ extension StructuredData {
 
         switch self {
         case .bool(let value):
-            return value ? "true" : "false"
+            return String(value)
 
         case .int(let value):
             return String(value)
