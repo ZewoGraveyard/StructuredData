@@ -46,8 +46,18 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertEqual(doubleData.uint, 1)
 		XCTAssertEqual(doubleData.double, 1.5)
 		XCTAssertEqual(stringData.string, "string")
-		XCTAssertEqual(arrayData.array!, array)
-		XCTAssertEqual(dictData.dictionary!, dict)
+
+		let array = arrayData.array
+		XCTAssertNotNil(array)
+		if let array = array {
+			XCTAssertEqual(array, self.array)
+		}
+
+		let dict = dictData.dictionary
+		XCTAssertNotNil(dict)
+		if let dict = dict {
+			XCTAssertEqual(dict, self.dict)
+		}
 
 		XCTAssertNil(boolData.int)
 		XCTAssertNil(intData.bool)
@@ -86,9 +96,19 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertEqual(try? doubleData.asUInt(), 1)
 		XCTAssertEqual(try? doubleData.asDouble(), 1.5)
 		XCTAssertEqual(try? stringData.asString(), "string")
-		XCTAssertEqual(try! arrayData.asArray(), array)
-		XCTAssertEqual(try! dictData.asDictionary(), dict)
 
+		let array = try? arrayData.asArray()
+		XCTAssertNotNil(array)
+		if let array = array {
+			XCTAssertEqual(array, self.array)
+		}
+
+		let dict = try? dictData.asDictionary()
+		XCTAssertNotNil(dict)
+		if let dict = dict {
+			XCTAssertEqual(dict, self.dict)
+		}
+		
 		XCTAssertNil(try? boolData.asInt())
 		XCTAssertNil(try? intData.asBool())
 		XCTAssertNil(try? stringData.asDouble())
