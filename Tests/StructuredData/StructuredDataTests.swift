@@ -37,6 +37,63 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertFalse(intData.isBool)
 	}
 
+	func testRetriveRawValue() {
+		XCTAssertEqual(boolData.bool, true)
+		XCTAssertEqual(intData.int, 1)
+		XCTAssertEqual(intData.uint, 1)
+		XCTAssertEqual(intData.double, 1)
+		XCTAssertEqual(doubleData.int, 1)
+		XCTAssertEqual(doubleData.uint, 1)
+		XCTAssertEqual(doubleData.double, 1.5)
+		XCTAssertEqual(stringData.string, "string")
+		XCTAssertEqual(arrayData.array!, array)
+		XCTAssertEqual(dictData.dictionary!, dict)
+
+		XCTAssertNil(boolData.int)
+		XCTAssertNil(intData.bool)
+		XCTAssertNil(stringData.double)
+	}
+
+	func testGet() {
+		let bool: Bool? = try? boolData.get()
+		XCTAssertEqual(bool, true)
+
+		let double: Double? = try? intData.get()
+		XCTAssertEqual(double, 1)
+
+		let int: Int? = try? intData.get()
+		XCTAssertNil(int)
+
+		let uint: UInt? = try? intData.get()
+		XCTAssertNil(uint)
+
+		let string: String? = try? stringData.get()
+		XCTAssertEqual(string, "string")
+
+		let array: [StructuredData]? = try? arrayData.get()
+		XCTAssertNotNil(array)
+
+		let dict: [String: StructuredData]? = try? dictData.get()
+		XCTAssertNotNil(dict)
+	}
+
+	func testAs() {
+		XCTAssertEqual(try? boolData.asBool(), true)
+		XCTAssertEqual(try? intData.asInt(), 1)
+		XCTAssertEqual(try? intData.asUInt(), 1)
+		XCTAssertEqual(try? intData.asDouble(), 1)
+		XCTAssertEqual(try? doubleData.asInt(), 1)
+		XCTAssertEqual(try? doubleData.asUInt(), 1)
+		XCTAssertEqual(try? doubleData.asDouble(), 1.5)
+		XCTAssertEqual(try? stringData.asString(), "string")
+		XCTAssertEqual(try! arrayData.asArray(), array)
+		XCTAssertEqual(try! dictData.asDictionary(), dict)
+
+		XCTAssertNil(try? boolData.asInt())
+		XCTAssertNil(try? intData.asBool())
+		XCTAssertNil(try? stringData.asDouble())
+	}
+
 	func testSubscriptByIndex() {
 		XCTAssertEqual(arrayData[0], .boolValue(true))
 		XCTAssertEqual(arrayData[1], .numberValue(1))
@@ -60,17 +117,6 @@ class StructuredDataTests: XCTestCase {
 
 		XCTAssertEqual(dict["bool"], .from(true))
 		XCTAssertEqual(dict["string"], .from("string"))
-	}
-
-	func testGet() {
-		let bool: Bool? = try? boolData.get()
-		XCTAssertEqual(bool, true)
-
-		let double: Double? = try? intData.get()
-		XCTAssertEqual(double, 1)
-
-		let int = try? intData.asInt()
-		XCTAssertEqual(int, 1)
 	}
 }
 

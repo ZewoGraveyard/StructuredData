@@ -143,14 +143,6 @@ public enum StructuredData {
         return try? get()
     }
 
-    public func get<T>(_ key: String) throws -> T {
-        if let value = self[key] {
-            return try value.get()
-        }
-
-        throw Error.incompatibleType
-    }
-
     public func get<T>() throws -> T {
         switch self {
         case boolValue(let value as T):
@@ -177,6 +169,14 @@ public enum StructuredData {
         throw Error.incompatibleType
     }
 
+    public func get<T>(_ key: String) throws -> T {
+        if let value = self[key] {
+            return try value.get()
+        }
+
+        throw Error.incompatibleType
+    }
+
     public func asBool() throws -> Bool {
         return try get()
     }
@@ -186,11 +186,17 @@ public enum StructuredData {
     }
 
     public func asInt() throws -> Int {
-        return try get()
+        if let int = int {
+            return int
+        }
+        throw Error.incompatibleType
     }
 
     public func asUInt() throws -> UInt {
-        return try get()
+        if let uint = uint {
+            return UInt(uint)
+        }
+        throw Error.incompatibleType
     }
 
     public func asString() throws -> String {
