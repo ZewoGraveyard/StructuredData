@@ -19,7 +19,7 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertEqual(StructuredData.infer(["bool": false, "double": 1.5]), dictData)
 	}
 
-	func testCheckType() {
+    func testCheckType() {
 		XCTAssertTrue(boolData.isBool)
 		XCTAssertTrue(intData.isInt)
         XCTAssertTrue(doubleData.isDouble)
@@ -54,7 +54,7 @@ class StructuredDataTests: XCTestCase {
 		XCTAssertNil(stringData.doubleValue)
     }
 
-	func testAsWithoutConverting() {
+	func testAs() {
 		XCTAssertEqual(try? boolData.asBool(), true)
         XCTAssertNotEqual(try? doubleData.asInt(), 1)
 		XCTAssertEqual(try? doubleData.asDouble(), 1.5)
@@ -152,8 +152,10 @@ class StructuredDataTests: XCTestCase {
 extension StructuredDataTests {
     static var allTests: [(String, (StructuredDataTests) -> () throws -> Void)] {
         return [
+           ("testFrom", testFrom),
            ("testCheckType", testCheckType),
-           ("testAsWithoutConverting", testAsWithoutConverting),
+           ("testRetrieveRawValue", testRetrieveRawValue),
+           ("testAs", testAs),
            ("testAsConverting", testAsConverting),
            ("testGet", testGet),
            ("testSubscriptByIndex", testSubscriptByIndex),
