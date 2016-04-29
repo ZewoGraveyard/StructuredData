@@ -27,7 +27,8 @@ public protocol StructuredDataSerializer {
 public enum StructuredData {
     case nullValue
     case boolValue(Bool)
-    case numberValue(Double)
+    case doubleValue(Double)
+    case integerValue(Int)
     case stringValue(String)
     case binaryValue(Data)
     case arrayValue([StructuredData])
@@ -42,11 +43,11 @@ public enum StructuredData {
     }
 
     public static func from(_ value: Double) -> StructuredData {
-        return .numberValue(value)
+        return .doubleValue(value)
     }
 
     public static func from(_ value: Int) -> StructuredData {
-        return .numberValue(Double(value))
+        return .integerValue(value)
     }
 
     public static func from(_ value: String) -> StructuredData {
@@ -72,8 +73,15 @@ public enum StructuredData {
         return false
     }
 
-    public var isNumber: Bool {
-        if case .numberValue = self {
+    public var isDouble: Bool {
+        if case .doubleValue = self {
+            return true
+        }
+        return false
+    }
+
+    public var isInteger: Bool {
+        if case .integerValue = self {
             return true
         }
         return false
@@ -116,11 +124,14 @@ public enum StructuredData {
     }
 
     public var int: Int? {
-        return double.flatMap({Int($0)})
+        return try? get()
     }
 
     public var uint: UInt? {
-        return double.flatMap({UInt($0)})
+        if let int = int where int >= 0 {
+            return UInt(int)
+        }
+        return nil
     }
 
     public var string: String? {
@@ -145,27 +156,22 @@ public enum StructuredData {
 
     public func get<T>() throws -> T {
         switch self {
-        case boolValue(let value as T):
+        case .boolValue(let value as T):
             return value
-
-        case numberValue(let value as T):
+        case .doubleValue(let value as T):
             return value
-
-        case stringValue(let value as T):
+        case .stringValue(let value as T):
             return value
-
+        case .integerValue(let value as T):
+            return value
         case .binaryValue(let value as T):
             return value
-
         case arrayValue(let value as T):
             return value
-
         case dictionaryValue(let value as T):
             return value
-
         default: break
         }
-
         throw Error.incompatibleType
     }
 
@@ -186,10 +192,7 @@ public enum StructuredData {
     }
 
     public func asInt() throws -> Int {
-        if let int = int {
-            return int
-        }
-        throw Error.incompatibleType
+        return try get()
     }
 
     public func asUInt() throws -> UInt {
@@ -258,29 +261,24 @@ extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
     switch (lhs, rhs) {
-        case (.nullValue, .nullValue):
-            return true
-
-        case (.boolValue(let l), .boolValue(let r)) where l == r:
-            return true
-
-        case (.stringValue(let l), .stringValue(let r)) where l == r:
-            return true
-
-        case (.binaryValue(let l), .binaryValue(let r)) where l == r:
-            return true
-
-        case (.numberValue(let l), .numberValue(let r)) where l == r:
-            return true
-
-        case (.arrayValue(let l), .arrayValue(let r)) where l == r:
-            return true
-
-        case (.dictionaryValue(let l), .dictionaryValue(let r)) where l == r:
-            return true
-
-        default:
-            return false
+    case (.nullValue, .nullValue):
+        return true
+    case (.boolValue(let l), .boolValue(let r)) where l == r:
+        return true
+    case (.stringValue(let l), .stringValue(let r)) where l == r:
+        return true
+    case (.binaryValue(let l), .binaryValue(let r)) where l == r:
+        return true
+    case (.doubleValue(let l), .doubleValue(let r)) where l == r:
+        return true
+    case (.integerValue(let l), .integerValue(let r)) where l == r:
+        return true
+    case (.arrayValue(let l), .arrayValue(let r)) where l == r:
+        return true
+    case (.dictionaryValue(let l), .dictionaryValue(let r)) where l == r:
+        return true
+    default:
+        return false
     }
 }
 
@@ -298,13 +296,13 @@ extension StructuredData: BooleanLiteralConvertible {
 
 extension StructuredData: IntegerLiteralConvertible {
     public init(integerLiteral value: IntegerLiteralType) {
-        self = .numberValue(Double(value))
+        self = .integerValue(Int(value))
     }
 }
 
 extension StructuredData: FloatLiteralConvertible {
     public init(floatLiteral value: FloatLiteralType) {
-        self = .numberValue(Double(value))
+        self = .doubleValue(Double(value))
     }
 }
 
@@ -359,7 +357,8 @@ extension StructuredData: CustomStringConvertible {
             switch data {
             case .nullValue: return "null"
             case .boolValue(let b): return String(b)
-            case .numberValue(let n): return serialize(number: n)
+            case .doubleValue(let n): return serialize(number: n)
+            case .integerValue(let n): return n.description
             case .stringValue(let s): return escape(s)
             case .binaryValue(let d): return escape(d.hexadecimalDescription)
             case .arrayValue(let a): return serialize(array: a)
