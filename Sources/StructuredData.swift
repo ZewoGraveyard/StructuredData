@@ -60,19 +60,19 @@ extension Array where Element: StructuredDataRepresentable {
     }
 }
 
-public protocol _String {
-    var _string: String { get }
+public protocol StructuredDataDictionaryKeyRepresentable {
+    var structuredDataDictionaryKey: String { get }
 }
-extension String: _String {
-    public var _string: String {
+extension String: StructuredDataDictionaryKeyRepresentable {
+    public var structuredDataDictionaryKey: String {
         return self
     }
 }
-extension Dictionary where Key: _String, Value: StructuredDataRepresentable {
+extension Dictionary where Key: StructuredDataDictionaryKeyRepresentable, Value: StructuredDataRepresentable {
     public var structuredDataDictionary: [String: StructuredData] {
         var dictionary: [String: StructuredData] = [:]
 
-        for (key, value) in self.map({($0.key._string, $0.value.structuredData)}) {
+        for (key, value) in self.map({($0.key.structuredDataDictionaryKey, $0.value.structuredData)}) {
             dictionary[key] = value
         }
 
