@@ -1,5 +1,9 @@
 @_exported import C7
 
+public enum StructuredDataError: ErrorProtocol {
+    case incompatibleType
+}
+
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
 }
@@ -14,11 +18,6 @@ public protocol StructuredDataSerializer {
     func serialize(_ structuredData: StructuredData) throws -> Data
 }
 
-extension StructuredData {
-    public enum Error: ErrorProtocol {
-        case incompatibleType
-    }
-}
 
 extension Bool: StructuredDataRepresentable {
     public var structuredData: StructuredData {
@@ -144,7 +143,7 @@ extension StructuredData {
         case .data(let value as T): return value
         case .array(let value as T): return value
         case .dictionary(let value as T): return value
-        default: throw Error.incompatibleType
+        default: throw StructuredDataError.incompatibleType
         }
     }
 
@@ -152,14 +151,14 @@ extension StructuredData {
         if let value = self[index] {
             return try value.get()
         }
-        throw Error.incompatibleType
+        throw StructuredDataError.incompatibleType
     }
 
     public func get<T>(_ key: String) throws -> T {
         if let value = self[key] {
             return try value.get()
         }
-        throw Error.incompatibleType
+        throw StructuredDataError.incompatibleType
     }
 }
 
@@ -256,11 +255,11 @@ extension StructuredData {
     public var boolValue: Bool? {
         return try? get()
     }
-
+    
     public var doubleValue: Double? {
         return try? get()
     }
-
+    
     public var intValue: Int? {
         return try? get()
     }
@@ -296,7 +295,7 @@ extension StructuredData {
             switch value {
             case 0: return false
             case 1: return true
-            default: throw Error.incompatibleType
+            default: throw StructuredDataError.incompatibleType
             }
 
         case .double(let value):
@@ -306,7 +305,7 @@ extension StructuredData {
             switch value.lowercased() {
             case "true": return true
             case "false": return false
-            default: throw Error.incompatibleType
+            default: throw StructuredDataError.incompatibleType
             }
 
         case .data(let value):
@@ -327,28 +326,28 @@ extension StructuredData {
         guard converting else {
             return try get()
         }
-        
+
         switch self {
         case .bool(let value):
             return value ? 1 : 0
-            
+
         case .int(let value):
             return value
-            
+
         case .double(let value):
             return Int(value)
-            
+
         case .string(let value):
             if let int = Int(value) {
                 return int
             }
-            throw Error.incompatibleType
-            
+            throw StructuredDataError.incompatibleType
+
         case .null:
             return 0
-            
+
         default:
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
         }
     }
 
@@ -371,13 +370,13 @@ extension StructuredData {
             if let double = Double(value) {
                 return double
             }
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
 
         case .null:
-                return 0
+            return 0
 
         default:
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
         }
     }
 
@@ -432,7 +431,7 @@ extension StructuredData {
             return []
 
         default:
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
         }
     }
 
@@ -449,7 +448,7 @@ extension StructuredData {
             return []
 
         default:
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
         }
     }
 
@@ -466,7 +465,7 @@ extension StructuredData {
             return [:]
 
         default:
-            throw Error.incompatibleType
+            throw StructuredDataError.incompatibleType
         }
     }
 }
