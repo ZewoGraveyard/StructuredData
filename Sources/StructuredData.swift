@@ -4,11 +4,63 @@ public enum StructuredDataError: ErrorProtocol {
     case incompatibleType
 }
 
+public protocol StructuredDataFallibleInitializable: StructuredDataFallibleConstructable {
+    init(structuredData: StructuredData) throws
+}
+
+extension StructuredDataFallibleInitializable {
+    public static func construct(with structuredData: StructuredData) throws -> Self {
+        return try self.init(structuredData: structuredData)
+    }
+}
+
+public protocol StructuredDataInitializable: StructuredDataFallibleInitializable, StructuredDataConstructable {
+    init(structuredData: StructuredData)
+}
+
+extension StructuredDataInitializable {
+    public init(structuredData: StructuredData) throws {
+        self.init(structuredData: structuredData)
+    }
+
+    public static func construct(with structuredData: StructuredData) -> Self {
+        return self.init(structuredData: structuredData)
+    }
+}
+
+public protocol StructuredDataFallibleRepresentable {
+    func asStructuredData() throws -> StructuredData
+}
+
+public protocol StructuredDataRepresentable: StructuredDataFallibleRepresentable {
+    var structuredData: StructuredData { get }
+}
+
+extension StructuredDataRepresentable {
+    public func asStructuredData() throws -> StructuredData {
+        return structuredData
+    }
+}
+
+public protocol StructuredDataFallibleConstructable {
+    static func construct(with: StructuredData) throws -> Self
+}
+
+public protocol StructuredDataConstructable: StructuredDataFallibleConstructable {
+    static func construct(with: StructuredData) -> Self
+}
+
+extension StructuredDataConstructable {
+    public static func construct(with structuredData: StructuredData) throws -> Self {
+        return construct(with: structuredData)
+    }
+}
+
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
 }
 
-public extension StructuredDataParser {
+extension StructuredDataParser {
     public func parse(_ convertible: DataConvertible) throws -> StructuredData {
         return try parse(convertible.data)
     }
@@ -18,6 +70,27 @@ public protocol StructuredDataSerializer {
     func serialize(_ structuredData: StructuredData) throws -> Data
 }
 
+extension Optional where Wrapped: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        switch self {
+        case .some(let wrapped): return wrapped.structuredData
+        case .none: return .null
+        }
+    }
+}
+
+extension Optional: StructuredDataFallibleRepresentable {
+    public func asStructuredData() throws -> StructuredData {
+        switch self {
+        case .some(let wrapped):
+            if let wrapped = wrapped as? StructuredDataFallibleRepresentable {
+                return try wrapped.asStructuredData()
+            }
+            throw StructuredDataError.incompatibleType
+        case .none: return .null
+        }
+    }
+}
 
 extension Bool: StructuredDataRepresentable {
     public var structuredData: StructuredData {
@@ -33,7 +106,7 @@ extension Double: StructuredDataRepresentable {
 
 extension Int: StructuredDataRepresentable {
     public var structuredData: StructuredData {
-        return .double(Double(self))
+        return .int(self)
     }
 }
 
@@ -101,9 +174,77 @@ extension StructuredData {
         
         self = .dictionary(dictionary)
     }
+
+    public init<T: StructuredDataRepresentable>(_ value: T?) {
+        self = value?.structuredData ?? .null
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [T]?) {
+        if let values = values {
+            self = .array(values.map({$0.structuredData}))
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [T?]?) {
+        if let values = values {
+            self = .array(values.map({$0?.structuredData ?? .null}))
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [String: T]?) {
+        if let values = values {
+            var dictionary: [String: StructuredData] = [:]
+
+            for (key, value) in values.map({($0.key, $0.value.structuredData)}) {
+                dictionary[key] = value
+            }
+
+            self = .dictionary(dictionary)
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [String: T?]?) {
+        if let values = values {
+            var dictionary: [String: StructuredData] = [:]
+
+            for (key, value) in values.map({($0.key, $0.value?.structuredData ?? .null)}) {
+                dictionary[key] = value
+            }
+
+            self = .dictionary(dictionary)
+        } else {
+            self = .null
+        }
+    }
 }
 
 extension StructuredData {
+    public static func infer<T: StructuredDataRepresentable>(_ value: T?) -> StructuredData {
+        return StructuredData(value)
+    }
+    
+    public static func infer<T: StructuredDataRepresentable>(_ values: [T]?) -> StructuredData {
+        return StructuredData(values)
+    }
+    
+    public static func infer<T: StructuredDataRepresentable>(_ values: [T?]?) -> StructuredData {
+        return StructuredData(values)
+    }
+    
+    public static func infer<T: StructuredDataRepresentable>(_ values: [String: T]?) -> StructuredData {
+        return StructuredData(values)
+    }
+    
+    public static func infer<T: StructuredDataRepresentable>(_ values: [String: T?]?) -> StructuredData {
+        return StructuredData(values)
+    }
+
     public static func infer(_ value: Bool) -> StructuredData {
         return .bool(value)
     }
@@ -464,6 +605,39 @@ extension StructuredData {
         case .null:
             return [:]
 
+        default:
+            throw StructuredDataError.incompatibleType
+        }
+    }
+}
+
+extension StructuredData {
+    public mutating func set(_ value: StructuredDataRepresentable, at key: String) throws {
+        try set(value.structuredData, at: key)
+    }
+    public mutating func set(_ value: StructuredData, at index: Int) throws {
+        switch self {
+        case .array(let array):
+            var array = array
+            if index >= 0 && index < array.count {
+                array[index] = value
+                self = .array(array)
+            }
+        default:
+            throw StructuredDataError.incompatibleType
+        }
+    }
+
+    public mutating func set(_ value: StructuredDataRepresentable, at index: Int) throws {
+        try set(value.structuredData, at: index)
+    }
+
+    public mutating func set(_ value: StructuredData?, at key: String) throws {
+        switch self {
+        case .dictionary(let dictionary):
+            var dictionary = dictionary
+            dictionary[key] = value
+            self = .dictionary(dictionary)
         default:
             throw StructuredDataError.incompatibleType
         }
