@@ -11,7 +11,7 @@ let dictData: StructuredData = .dictionaryValue(["bool": false, "double": 1.5])
 
 class StructuredDataTests: XCTestCase {
 
-	static var allTests: [(String, StructuredDataTests -> () throws -> Void)] {
+	static var allTests: [(String, (StructuredDataTests) -> () throws -> Void)] {
         return [
            ("testFrom", testFrom),
            ("testCheckType", testCheckType),
