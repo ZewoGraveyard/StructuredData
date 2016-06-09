@@ -24,151 +24,109 @@ public protocol StructuredDataSerializer {
     func serialize(_ structuredData: StructuredData) throws -> Data
 }
 
-public enum StructuredData {
-    case nullValue
-    case boolValue(Bool)
-    case doubleValue(Double)
-    case integerValue(Int)
-    case stringValue(String)
-    case binaryValue(Data)
-    case arrayValue([StructuredData])
-    case dictionaryValue([String: StructuredData])
-
+extension StructuredData {
     public enum Error: ErrorProtocol {
         case incompatibleType
     }
+}
 
-    public static func from(_ value: Bool) -> StructuredData {
-        return .boolValue(value)
+extension StructuredData {
+    public static func infer(_ value: Bool) -> StructuredData {
+        return .bool(value)
     }
 
-    public static func from(_ value: Double) -> StructuredData {
-        return .doubleValue(value)
+    public static func infer(_ value: Double) -> StructuredData {
+        return .double(value)
     }
 
-    public static func from(_ value: Int) -> StructuredData {
-        return .integerValue(value)
+    public static func infer(_ value: Int) -> StructuredData {
+        return .int(value)
     }
 
-    public static func from(_ value: String) -> StructuredData {
-        return .stringValue(value)
+    public static func infer(_ value: String) -> StructuredData {
+        return .string(value)
     }
 
-    public static func from(_ value: Data) -> StructuredData {
-        return .binaryValue(value)
+    public static func infer(_ value: Data) -> StructuredData {
+        return .data(value)
     }
 
-    public static func from(_ value: [StructuredData]) -> StructuredData {
-        return .arrayValue(value)
+    public static func infer(_ value: [StructuredData]) -> StructuredData {
+        return .array(value)
     }
 
-    public static func from(_ value: [String: StructuredData]) -> StructuredData {
-        return .dictionaryValue(value)
+    public static func infer(_ value: [String: StructuredData]) -> StructuredData {
+        return .dictionary(value)
     }
+}
 
+extension StructuredData {
     public var isBool: Bool {
-        if case .boolValue = self {
+        if case .bool = self {
             return true
         }
         return false
     }
 
     public var isDouble: Bool {
-        if case .doubleValue = self {
+        if case .double = self {
             return true
         }
         return false
     }
 
     public var isInteger: Bool {
-        if case .integerValue = self {
+        if case .int = self {
             return true
         }
         return false
     }
 
     public var isString: Bool {
-        if case .stringValue = self {
+        if case .string = self {
             return true
         }
         return false
     }
 
-    public var isBinary: Bool {
-        if case .binaryValue = self {
+    public var isData: Bool {
+        if case .data = self {
             return true
         }
         return false
     }
 
     public var isArray: Bool {
-        if case .arrayValue = self {
+        if case .array = self {
             return true
         }
         return false
     }
 
     public var isDictionary: Bool {
-        if case .dictionaryValue = self {
+        if case .dictionary = self {
             return true
         }
         return false
     }
+}
 
-    public var bool: Bool? {
-        return try? get()
-    }
-
-    public var double: Double? {
-        return try? get()
-    }
-
-    public var int: Int? {
-        return try? get()
-    }
-
-    public var uint: UInt? {
-        if let int = int where int >= 0 {
-            return UInt(int)
-        }
-        return nil
-    }
-
-    public var string: String? {
-        return try? get()
-    }
-
-    public var binary: Data? {
-        return try? get()
-    }
-
-    public var array: [StructuredData]? {
-        return try? get()
-    }
-
-    public var dictionary: [String: StructuredData]? {
-        return try? get()
-    }
-
-    public func get<T>() -> T? {
-        return try? get()
-    }
-
+extension StructuredData {
     public func get<T>() throws -> T {
         switch self {
-        case .boolValue(let value as T):
+        case .bool(let value as T):
             return value
-        case .doubleValue(let value as T):
+        case .double(let value as T):
             return value
-        case .stringValue(let value as T):
+        case .string(let value as T):
             return value
-        case .integerValue(let value as T):
+        case .int(let value as T):
             return value
-        case .binaryValue(let value as T):
+        case .data(let value as T):
             return value
-        case arrayValue(let value as T):
+        case .array(let value as T):
             return value
-        case dictionaryValue(let value as T):
+        case .dictionary(let value as T):
             return value
         default: break
         }
@@ -183,6 +141,49 @@ public enum StructuredData {
         throw Error.incompatibleType
     }
 
+    public func get<T>() -> T? {
+        return try? get()
+    }
+}
+
+extension StructuredData {
+    public var boolValue: Bool? {
+        return try? get()
+    }
+
+    public var doubleValue: Double? {
+        return try? get()
+    }
+
+    public var intValue: Int? {
+        return try? get()
+    }
+
+    public var uintValue: UInt? {
+        if let int = intValue where int >= 0 {
+            return UInt(int)
+        }
+        return nil
+    }
+
+    public var stringValue: String? {
+        return try? get()
+    }
+
+    public var dataValue: Data? {
+        return try? get()
+    }
+
+    public var arrayValue: [StructuredData]? {
+        return try? get()
+    }
+
+    public var dictionaryValue: [String: StructuredData]? {
+        return try? get()
+    }
+}
+
+extension StructuredData {
     public func asBool() throws -> Bool {
         return try get()
     }
@@ -196,7 +197,7 @@ public enum StructuredData {
     }
 
     public func asUInt() throws -> UInt {
-        if let uint = uint {
+        if let uint = uintValue {
             return UInt(uint)
         }
         throw Error.incompatibleType
@@ -206,7 +207,7 @@ public enum StructuredData {
         return try get()
     }
 
-    public func asBinary() throws -> Data {
+    public func asData() throws -> Data {
         return try get()
     }
 
@@ -217,10 +218,12 @@ public enum StructuredData {
     public func asDictionary() throws -> [String: StructuredData] {
         return try get()
     }
+}
 
+extension StructuredData {
     public subscript(index: Int) -> StructuredData? {
         get {
-            guard let array = array where index >= 0 && index < array.count else {
+            guard let array = arrayValue where index >= 0 && index < array.count else {
                 return nil
             }
             return array[index]
@@ -228,11 +231,11 @@ public enum StructuredData {
 
         set(structuredData) {
             switch self {
-            case .arrayValue(let array):
+            case .array(let array):
                 var array = array
                 if index >= 0 && index < array.count {
-                    array[index] = structuredData ?? .nullValue
-                    self = .arrayValue(array)
+                    array[index] = structuredData ?? .null
+                    self = .array(array)
                 }
             default:
                  break
@@ -242,15 +245,15 @@ public enum StructuredData {
 
     public subscript(key: String) -> StructuredData? {
         get {
-            return dictionary?[key]
+            return dictionaryValue?[key]
         }
 
         set(structuredData) {
             switch self {
-            case .dictionaryValue(let dictionary):
+            case .dictionary(let dictionary):
                 var dictionary = dictionary
                 dictionary[key] = structuredData
-                self = .dictionaryValue(dictionary)
+                self = .dictionary(dictionary)
             default: break
             }
         }
@@ -261,21 +264,21 @@ extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
     switch (lhs, rhs) {
-    case (.nullValue, .nullValue):
+    case (.null, .null):
         return true
-    case (.boolValue(let l), .boolValue(let r)) where l == r:
+    case (.bool(let l), .bool(let r)) where l == r:
         return true
-    case (.stringValue(let l), .stringValue(let r)) where l == r:
+    case (.string(let l), .string(let r)) where l == r:
         return true
-    case (.binaryValue(let l), .binaryValue(let r)) where l == r:
+    case (.data(let l), .data(let r)) where l == r:
         return true
-    case (.doubleValue(let l), .doubleValue(let r)) where l == r:
+    case (.double(let l), .double(let r)) where l == r:
         return true
-    case (.integerValue(let l), .integerValue(let r)) where l == r:
+    case (.int(let l), .int(let r)) where l == r:
         return true
-    case (.arrayValue(let l), .arrayValue(let r)) where l == r:
+    case (.array(let l), .array(let r)) where l == r:
         return true
-    case (.dictionaryValue(let l), .dictionaryValue(let r)) where l == r:
+    case (.dictionary(let l), .dictionary(let r)) where l == r:
         return true
     default:
         return false
@@ -284,56 +287,56 @@ public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
 
 extension StructuredData: NilLiteralConvertible {
     public init(nilLiteral value: Void) {
-        self = .nullValue
+        self = .null
     }
 }
 
 extension StructuredData: BooleanLiteralConvertible {
     public init(booleanLiteral value: BooleanLiteralType) {
-        self = .boolValue(value)
+        self = .bool(value)
     }
 }
 
 extension StructuredData: IntegerLiteralConvertible {
     public init(integerLiteral value: IntegerLiteralType) {
-        self = .integerValue(Int(value))
+        self = .int(Int(value))
     }
 }
 
 extension StructuredData: FloatLiteralConvertible {
     public init(floatLiteral value: FloatLiteralType) {
-        self = .doubleValue(Double(value))
+        self = .double(Double(value))
     }
 }
 
 extension StructuredData: StringLiteralConvertible {
     public init(unicodeScalarLiteral value: String) {
-        self = .stringValue(value)
+        self = .string(value)
     }
 
     public init(extendedGraphemeClusterLiteral value: String) {
-        self = .stringValue(value)
+        self = .string(value)
     }
 
     public init(stringLiteral value: StringLiteralType) {
-        self = .stringValue(value)
+        self = .string(value)
     }
 }
 
 extension StructuredData: StringInterpolationConvertible {
     public init(stringInterpolation strings: StructuredData...) {
-        let string = strings.reduce("") { $0 + ($1.string ?? "") }
-        self = .stringValue(string)
+        let string = strings.reduce("") { $0 + ($1.stringValue ?? "") }
+        self = .string(string)
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
-        self = .stringValue(String(expr))
+        self = .string(String(expr))
     }
 }
 
 extension StructuredData: ArrayLiteralConvertible {
     public init(arrayLiteral elements: StructuredData...) {
-        self = .arrayValue(elements)
+        self = .array(elements)
     }
 }
 
@@ -345,7 +348,7 @@ extension StructuredData: DictionaryLiteralConvertible {
             dictionary[key] = value
         }
 
-        self = .dictionaryValue(dictionary)
+        self = .dictionary(dictionary)
     }
 }
 
@@ -355,14 +358,14 @@ extension StructuredData: CustomStringConvertible {
 
         func serialize(_ data: StructuredData) -> String {
             switch data {
-            case .nullValue: return "null"
-            case .boolValue(let b): return String(b)
-            case .doubleValue(let n): return serialize(number: n)
-            case .integerValue(let n): return n.description
-            case .stringValue(let s): return escape(s)
-            case .binaryValue(let d): return escape(d.hexadecimalDescription)
-            case .arrayValue(let a): return serialize(array: a)
-            case .dictionaryValue(let o): return serialize(object: o)
+            case .null: return "null"
+            case .bool(let b): return String(b)
+            case .double(let n): return serialize(number: n)
+            case .int(let n): return n.description
+            case .string(let s): return escape(s)
+            case .data(let d): return escape(d.hexadecimalDescription)
+            case .array(let a): return serialize(array: a)
+            case .dictionary(let o): return serialize(object: o)
             }
         }
 
