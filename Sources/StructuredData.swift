@@ -1,15 +1,5 @@
 @_exported import C7
 
-public protocol StructuredDataInitializable {
-    init(structuredData: StructuredData) throws
-}
-
-public protocol StructuredDataRepresentable {
-    var structuredData: StructuredData { get }
-}
-
-public protocol StructuredDataConvertible: StructuredDataInitializable, StructuredDataRepresentable {}
-
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
 }
