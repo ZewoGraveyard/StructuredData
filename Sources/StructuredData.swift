@@ -126,7 +126,7 @@ extension Array where Element: StructuredDataRepresentable {
     public var structuredDataArray: [StructuredData] {
         return self.map({$0.structuredData})
     }
-    
+
     public var structuredData: StructuredData {
         return .array(structuredDataArray)
     }
@@ -160,18 +160,18 @@ extension StructuredData {
     public init(_ value: StructuredDataRepresentable) {
         self = value.structuredData
     }
-    
+
     public init(_ values: [StructuredDataRepresentable]) {
         self = .array(values.map({$0.structuredData}))
     }
-    
+
     public init(_ values: [String: StructuredDataRepresentable]) {
         var dictionary: [String: StructuredData] = [:]
-        
+
         for (key, value) in values.map({($0.key, $0.value.structuredData)}) {
             dictionary[key] = value
         }
-        
+
         self = .dictionary(dictionary)
     }
 
@@ -228,19 +228,19 @@ extension StructuredData {
     public static func infer<T: StructuredDataRepresentable>(_ value: T?) -> StructuredData {
         return StructuredData(value)
     }
-    
+
     public static func infer<T: StructuredDataRepresentable>(_ values: [T]?) -> StructuredData {
         return StructuredData(values)
     }
-    
+
     public static func infer<T: StructuredDataRepresentable>(_ values: [T?]?) -> StructuredData {
         return StructuredData(values)
     }
-    
+
     public static func infer<T: StructuredDataRepresentable>(_ values: [String: T]?) -> StructuredData {
         return StructuredData(values)
     }
-    
+
     public static func infer<T: StructuredDataRepresentable>(_ values: [String: T?]?) -> StructuredData {
         return StructuredData(values)
     }
@@ -248,27 +248,27 @@ extension StructuredData {
     public static func infer(_ value: Bool) -> StructuredData {
         return .bool(value)
     }
-    
+
     public static func infer(_ value: Double) -> StructuredData {
         return .double(value)
     }
-    
+
     public static func infer(_ value: Int) -> StructuredData {
         return .int(value)
     }
-    
+
     public static func infer(_ value: String) -> StructuredData {
         return .string(value)
     }
-    
+
     public static func infer(_ value: Data) -> StructuredData {
         return .data(value)
     }
-    
+
     public static func infer(_ value: [StructuredData]) -> StructuredData {
         return .array(value)
     }
-    
+
     public static func infer(_ value: [String: StructuredData]) -> StructuredData {
         return .dictionary(value)
     }
@@ -311,7 +311,7 @@ extension StructuredData {
             }
             return array[index]
         }
-        
+
         set(structuredData) {
             switch self {
             case .array(let array):
@@ -324,7 +324,7 @@ extension StructuredData {
             }
         }
     }
-    
+
     public subscript(key: String) -> StructuredData? {
         get {
             return dictionaryValue?[key]
@@ -348,42 +348,42 @@ extension StructuredData {
         }
         return false
     }
-    
+
     public var isDouble: Bool {
         if case .double = self {
             return true
         }
         return false
     }
-    
+
     public var isInt: Bool {
         if case .int = self {
             return true
         }
         return false
     }
-    
+
     public var isString: Bool {
         if case .string = self {
             return true
         }
         return false
     }
-    
+
     public var isData: Bool {
         if case .data = self {
             return true
         }
         return false
     }
-    
+
     public var isArray: Bool {
         if case .array = self {
             return true
         }
         return false
     }
-    
+
     public var isDictionary: Bool {
         if case .dictionary = self {
             return true
@@ -396,11 +396,11 @@ extension StructuredData {
     public var boolValue: Bool? {
         return try? get()
     }
-    
+
     public var doubleValue: Double? {
         return try? get()
     }
-    
+
     public var intValue: Int? {
         return try? get()
     }
