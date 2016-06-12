@@ -134,6 +134,151 @@ extension StructuredData {
     public func get<T>() -> T? {
         return try? get()
     }
+
+    public func get<T>(optional: String) -> T? {
+        return try? get(optional) as T
+    }
+}
+
+extension Optional where Wrapped: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        switch self {
+        case .some(let wrapped): return wrapped.structuredData
+        case .none: return .null
+        }
+    }
+}
+
+extension Bool: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return .bool(self)
+    }
+}
+
+extension Double: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return .double(self)
+    }
+}
+
+extension Int: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return .int(self)
+    }
+}
+
+extension String: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return .string(self)
+    }
+}
+
+extension Data: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return .data(self)
+    }
+}
+
+extension Sequence where Iterator.Element: StructuredDataRepresentable {
+    public var structuredDataArray: [StructuredData] {
+        return self.map({$0.structuredData})
+    }
+
+    public var structuredData: StructuredData {
+        return .array(structuredDataArray)
+    }
+}
+
+public protocol StructuredDataDictionaryKeyRepresentable {
+    var structuredDataDictionaryKey: String { get }
+}
+extension String: StructuredDataDictionaryKeyRepresentable {
+    public var structuredDataDictionaryKey: String {
+        return self
+    }
+}
+extension Dictionary where Key: StructuredDataDictionaryKeyRepresentable, Value: StructuredDataRepresentable {
+    public var structuredDataDictionary: [String: StructuredData] {
+        var dictionary: [String: StructuredData] = [:]
+
+        for (key, value) in self.map({($0.key.structuredDataDictionaryKey, $0.value.structuredData)}) {
+            dictionary[key] = value
+        }
+
+        return dictionary
+    }
+
+    public var structuredData: StructuredData {
+        return .dictionary(structuredDataDictionary)
+    }
+}
+
+extension StructuredData {
+    public init(_ value: StructuredDataRepresentable) {
+        self = value.structuredData
+    }
+
+    public init(_ values: [StructuredDataRepresentable]) {
+        self = .array(values.map({$0.structuredData}))
+    }
+
+    public init(_ values: [String: StructuredDataRepresentable]) {
+        var dictionary: [String: StructuredData] = [:]
+
+        for (key, value) in values.map({($0.key, $0.value.structuredData)}) {
+            dictionary[key] = value
+        }
+
+        self = .dictionary(dictionary)
+    }
+
+    public init<T: StructuredDataRepresentable>(_ value: T?) {
+        self = value?.structuredData ?? .null
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [T]?) {
+        if let values = values {
+            self = .array(values.map({$0.structuredData}))
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [T?]?) {
+        if let values = values {
+            self = .array(values.map({$0?.structuredData ?? .null}))
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [String: T]?) {
+        if let values = values {
+            var dictionary: [String: StructuredData] = [:]
+
+            for (key, value) in values.map({($0.key, $0.value.structuredData)}) {
+                dictionary[key] = value
+            }
+
+            self = .dictionary(dictionary)
+        } else {
+            self = .null
+        }
+    }
+
+    public init<T: StructuredDataRepresentable>(_ values: [String: T?]?) {
+        if let values = values {
+            var dictionary: [String: StructuredData] = [:]
+
+            for (key, value) in values.map({($0.key, $0.value?.structuredData ?? .null)}) {
+                dictionary[key] = value
+            }
+
+            self = .dictionary(dictionary)
+        } else {
+            self = .null
+        }
+    }
 }
 
 extension StructuredData {
