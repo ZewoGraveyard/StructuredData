@@ -125,7 +125,7 @@ extension Data: StructuredDataRepresentable {
     }
 }
 
-extension Array where Element: StructuredDataRepresentable {
+extension Sequence where Iterator.Element: StructuredDataRepresentable {
     public var structuredDataArray: [StructuredData] {
         return self.map({$0.structuredData})
     }
@@ -143,11 +143,11 @@ extension String: StructuredDataDictionaryKeyRepresentable {
         return self
     }
 }
-extension Dictionary where Key: StructuredDataDictionaryKeyRepresentable, Value: StructuredDataRepresentable {
+extension Collection where Iterator.Element == (StructuredDataDictionaryKeyRepresentable, StructuredDataRepresentable) {
     public var structuredDataDictionary: [String: StructuredData] {
         var dictionary: [String: StructuredData] = [:]
 
-        for (key, value) in self.map({($0.key.structuredDataDictionaryKey, $0.value.structuredData)}) {
+        for (key, value) in self.map({($0.0.structuredDataDictionaryKey, $0.1.structuredData)}) {
             dictionary[key] = value
         }
 
