@@ -4,6 +4,7 @@ public enum StructuredDataError: ErrorProtocol {
     case incompatibleType
 }
 
+// MARK: Convertible Protocols
 public protocol StructuredDataFallibleInitializable: StructuredDataFallibleConstructable {
     init(structuredData: StructuredData) throws
 }
@@ -56,6 +57,7 @@ extension StructuredDataConstructable {
     }
 }
 
+// MARK: Parser/Serializer Protocols
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
 }
@@ -70,6 +72,7 @@ public protocol StructuredDataSerializer {
     func serialize(_ structuredData: StructuredData) throws -> Data
 }
 
+// MARK: StructuredDataRepresentable
 extension Optional where Wrapped: StructuredDataRepresentable {
     public var structuredData: StructuredData {
         switch self {
@@ -156,6 +159,7 @@ extension Dictionary where Key: StructuredDataDictionaryKeyRepresentable, Value:
     }
 }
 
+// MARK: Initializers
 extension StructuredData {
     public init(_ value: StructuredDataRepresentable) {
         self = value.structuredData
@@ -224,6 +228,7 @@ extension StructuredData {
     }
 }
 
+// MARK: Type Inference
 extension StructuredData {
     public static func infer<T: StructuredDataRepresentable>(_ value: T?) -> StructuredData {
         return StructuredData(value)
@@ -274,6 +279,7 @@ extension StructuredData {
     }
 }
 
+// MARK: Getters/Setters
 extension StructuredData {
     public func get<T>() throws -> T {
         switch self {
@@ -301,8 +307,41 @@ extension StructuredData {
         }
         throw StructuredDataError.incompatibleType
     }
+
+    public mutating func set(_ value: StructuredDataRepresentable, at key: String) throws {
+        try set(value.structuredData, at: key)
+    }
+
+    public mutating func set(_ value: StructuredData, at index: Int) throws {
+        switch self {
+        case .array(let array):
+            var array = array
+            if index >= 0 && index < array.count {
+                array[index] = value
+                self = .array(array)
+            }
+        default:
+            throw StructuredDataError.incompatibleType
+        }
+    }
+
+    public mutating func set(_ value: StructuredDataRepresentable, at index: Int) throws {
+        try set(value.structuredData, at: index)
+    }
+
+    public mutating func set(_ value: StructuredData?, at key: String) throws {
+        switch self {
+        case .dictionary(let dictionary):
+            var dictionary = dictionary
+            dictionary[key] = value
+            self = .dictionary(dictionary)
+        default:
+            throw StructuredDataError.incompatibleType
+        }
+    }
 }
 
+// MARK: Subscripts
 extension StructuredData {
     public subscript(index: Int) -> StructuredData? {
         get {
@@ -341,6 +380,7 @@ extension StructuredData {
     }
 }
 
+// MARK: is<Type>
 extension StructuredData {
     public var isBool: Bool {
         if case .bool = self {
@@ -392,6 +432,7 @@ extension StructuredData {
     }
 }
 
+// MARK: <type>Value
 extension StructuredData {
     public var boolValue: Bool? {
         return try? get()
@@ -422,6 +463,7 @@ extension StructuredData {
     }
 }
 
+// MARK: as<type>
 extension StructuredData {
     public func asBool(converting: Bool = false) throws -> Bool {
         guard converting else {
@@ -611,39 +653,7 @@ extension StructuredData {
     }
 }
 
-extension StructuredData {
-    public mutating func set(_ value: StructuredDataRepresentable, at key: String) throws {
-        try set(value.structuredData, at: key)
-    }
-    public mutating func set(_ value: StructuredData, at index: Int) throws {
-        switch self {
-        case .array(let array):
-            var array = array
-            if index >= 0 && index < array.count {
-                array[index] = value
-                self = .array(array)
-            }
-        default:
-            throw StructuredDataError.incompatibleType
-        }
-    }
-
-    public mutating func set(_ value: StructuredDataRepresentable, at index: Int) throws {
-        try set(value.structuredData, at: index)
-    }
-
-    public mutating func set(_ value: StructuredData?, at key: String) throws {
-        switch self {
-        case .dictionary(let dictionary):
-            var dictionary = dictionary
-            dictionary[key] = value
-            self = .dictionary(dictionary)
-        default:
-            throw StructuredDataError.incompatibleType
-        }
-    }
-}
-
+// MARK: Equatable
 extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
@@ -660,6 +670,7 @@ public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
     }
 }
 
+// MARK: Literal Convertibles
 extension StructuredData: NilLiteralConvertible {
     public init(nilLiteral value: Void) {
         self = .null
@@ -726,9 +737,39 @@ extension StructuredData: DictionaryLiteralConvertible {
     }
 }
 
+// MARK: CustomStringConvertible
 extension StructuredData: CustomStringConvertible {
     public var description: String {
         var indentLevel = 0
+
+        let escapeMapping: [Character: String] = [
+             "\r": "\\r",
+             "\n": "\\n",
+             "\t": "\\t",
+             "\\": "\\\\",
+             "\"": "\\\"",
+
+             "\u{2028}": "\\u2028",
+             "\u{2029}": "\\u2029",
+
+             "\r\n": "\\r\\n"
+        ]
+
+        func escape(_ source: String) -> String {
+            var s = "\""
+
+            for c in source.characters {
+                if let escapedSymbol = escapeMapping[c] {
+                    s.append(escapedSymbol)
+                } else {
+                    s.append(c)
+                }
+            }
+
+            s.append("\"")
+
+            return s
+        }
 
         func serialize(_ data: StructuredData) -> String {
             switch data {
@@ -797,32 +838,3 @@ extension StructuredData: CustomStringConvertible {
         return serialize(self)
     }
 }
-
-func escape(_ source: String) -> String {
-    var s = "\""
-
-    for c in source.characters {
-        if let escapedSymbol = escapeMapping[c] {
-            s.append(escapedSymbol)
-        } else {
-            s.append(c)
-        }
-    }
-
-    s.append("\"")
-
-    return s
-}
-
-let escapeMapping: [Character: String] = [
-    "\r": "\\r",
-    "\n": "\\n",
-    "\t": "\\t",
-    "\\": "\\\\",
-    "\"": "\\\"",
-
-    "\u{2028}": "\\u2028",
-    "\u{2029}": "\\u2029",
-
-    "\r\n": "\\r\\n"
-]
