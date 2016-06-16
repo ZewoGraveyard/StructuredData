@@ -140,6 +140,12 @@ extension StructuredData {
     }
 }
 
+extension StructuredData: StructuredDataRepresentable {
+    public var structuredData: StructuredData {
+        return self
+    }
+}
+
 extension Optional where Wrapped: StructuredDataRepresentable {
     public var structuredData: StructuredData {
         switch self {
