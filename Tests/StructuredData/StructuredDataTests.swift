@@ -215,6 +215,54 @@ class StructuredDataTests: XCTestCase {
         XCTAssertEqual(dict["dictionary"], .dictionary(["foo": .string("bar")]))
         XCTAssertEqual(dict["dictionaryOfOptional"], .dictionary(["foo": .null]))
     }
+    
+    func testReflection() {
+        struct Object : C7.StructuredDataInitializable {
+            let a: Int?
+            let b: Bool
+            let c: Double
+            let d: Int
+            let e: String
+            let f: Data
+            let g: [Int]
+            let h: [String: Int]
+        }
+        
+        let a: Int? = nil
+        let b = true
+        let c = 1.23
+        let d = 12
+        let e = "Hello"
+        let f = Data()
+        let g = [0, 1, 2]
+        let h = ["x": 1, "y": 2, "z": 3]
+        
+        let structuredData: StructuredData = [
+             "a": .infer(a),
+             "b": .infer(b),
+             "c": .infer(c),
+             "d": .infer(d),
+             "e": .infer(e),
+             "f": .infer(f),
+             "g": .infer(g),
+             "h": .infer(h),
+        ]
+        
+        let expected = Object(a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h)
+        do {
+            let object = try Object(structuredData: structuredData)
+            XCTAssert(object.a == expected.a)
+            XCTAssert(object.b == expected.b)
+            XCTAssert(object.c == expected.c)
+            XCTAssert(object.d == expected.d)
+            XCTAssert(object.e == expected.e)
+            XCTAssert(object.f == expected.f)
+            XCTAssert(object.h == expected.h)
+        } catch {
+            XCTFail(String(error))
+        }
+    }
+    
 }
 
 extension StructuredDataTests {

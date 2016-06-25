@@ -2,6 +2,8 @@
 
 public enum StructuredDataError: ErrorProtocol {
     case incompatibleType
+    case notStructuredDataInitializable(Any.Type)
+    case cannotInitialize(type: Any.Type, from: Any.Type)
 }
 
 // MARK: Convertible Protocols
