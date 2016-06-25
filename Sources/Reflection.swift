@@ -3,7 +3,9 @@ import Reflection
 extension C7.StructuredDataInitializable {
     
     init(structuredData: StructuredData) throws {
-        let dictionary = try structuredData.asDictionary()
+        guard case .dictionary(let dictionary) = structuredData else {
+            throw StructuredDataError.cannotInitialize(type: Self.self, from: try structuredData.get().dynamicType)
+        }
         self = try construct { property in
             guard let initializable = property.type as? C7.StructuredDataInitializable.Type else {
                 throw StructuredDataError.notStructuredDataInitializable(property.type)
