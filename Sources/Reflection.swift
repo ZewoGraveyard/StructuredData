@@ -2,7 +2,7 @@ import Reflection
 
 extension C7.StructuredDataInitializable {
     
-    init(structuredData: StructuredData) throws {
+    public init(structuredData: StructuredData) throws {
         guard case .dictionary(let dictionary) = structuredData else {
             throw StructuredDataError.cannotInitialize(type: Self.self, from: try structuredData.get().dynamicType)
         }
