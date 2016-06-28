@@ -6,59 +6,6 @@ public enum StructuredDataError: ErrorProtocol {
     case cannotInitialize(type: Any.Type, from: Any.Type)
 }
 
-// MARK: Convertible Protocols
-public protocol StructuredDataFallibleInitializable: StructuredDataFallibleConstructable {
-    init(structuredData: StructuredData) throws
-}
-
-extension StructuredDataFallibleInitializable {
-    public static func construct(with structuredData: StructuredData) throws -> Self {
-        return try self.init(structuredData: structuredData)
-    }
-}
-
-public protocol StructuredDataInitializable: StructuredDataFallibleInitializable, StructuredDataConstructable {
-    init(structuredData: StructuredData)
-}
-
-extension StructuredDataInitializable {
-    public init(structuredData: StructuredData) throws {
-        self.init(structuredData: structuredData)
-    }
-
-    public static func construct(with structuredData: StructuredData) -> Self {
-        return self.init(structuredData: structuredData)
-    }
-}
-
-public protocol StructuredDataFallibleRepresentable {
-    func asStructuredData() throws -> StructuredData
-}
-
-public protocol StructuredDataRepresentable: StructuredDataFallibleRepresentable {
-    var structuredData: StructuredData { get }
-}
-
-extension StructuredDataRepresentable {
-    public func asStructuredData() throws -> StructuredData {
-        return structuredData
-    }
-}
-
-public protocol StructuredDataFallibleConstructable {
-    static func construct(with: StructuredData) throws -> Self
-}
-
-public protocol StructuredDataConstructable: StructuredDataFallibleConstructable {
-    static func construct(with: StructuredData) -> Self
-}
-
-extension StructuredDataConstructable {
-    public static func construct(with structuredData: StructuredData) throws -> Self {
-        return construct(with: structuredData)
-    }
-}
-
 // MARK: Parser/Serializer Protocols
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
@@ -79,19 +26,6 @@ extension Optional where Wrapped: StructuredDataRepresentable {
     public var structuredData: StructuredData {
         switch self {
         case .some(let wrapped): return wrapped.structuredData
-        case .none: return .null
-        }
-    }
-}
-
-extension Optional: StructuredDataFallibleRepresentable {
-    public func asStructuredData() throws -> StructuredData {
-        switch self {
-        case .some(let wrapped):
-            if let wrapped = wrapped as? StructuredDataFallibleRepresentable {
-                return try wrapped.asStructuredData()
-            }
-            throw StructuredDataError.incompatibleType
         case .none: return .null
         }
     }
