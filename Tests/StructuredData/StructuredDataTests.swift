@@ -9,6 +9,28 @@ let arrayData: StructuredData = [true, 1.5]
 let dictData: StructuredData = ["bool": false, "double": 1.5]
 let nullData: StructuredData = nil
 
+struct Object : StructuredDataConvertible, Equatable {
+    let a: Int?
+    let b: Bool
+    let c: Double
+    let d: Int
+    let e: String
+    let f: Data
+    let g: [Int]
+    let h: [String: Int]
+}
+
+func ==(lhs: Object, rhs: Object) -> Bool {
+    return lhs.a == rhs.a &&
+        lhs.b == rhs.b &&
+        lhs.c == rhs.c &&
+        lhs.d == rhs.d &&
+        lhs.e == rhs.e &&
+        lhs.f == rhs.f &&
+        lhs.g == rhs.g &&
+        lhs.h == rhs.h
+}
+
 class StructuredDataTests: XCTestCase {
 	func testFrom() {
 		XCTAssertEqual(StructuredData.infer(true), boolData)
@@ -217,17 +239,6 @@ class StructuredDataTests: XCTestCase {
     }
     
     func testReflection() {
-        struct Object : C7.StructuredDataInitializable {
-            let a: Int?
-            let b: Bool
-            let c: Double
-            let d: Int
-            let e: String
-            let f: Data
-            let g: [Int]
-            let h: [String: Int]
-        }
-        
         let a: Int? = nil
         let b = true
         let c = 1.23
@@ -251,13 +262,16 @@ class StructuredDataTests: XCTestCase {
         let expected = Object(a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h)
         do {
             let object = try Object(structuredData: structuredData)
-            XCTAssert(object.a == expected.a)
-            XCTAssert(object.b == expected.b)
-            XCTAssert(object.c == expected.c)
-            XCTAssert(object.d == expected.d)
-            XCTAssert(object.e == expected.e)
-            XCTAssert(object.f == expected.f)
-            XCTAssert(object.h == expected.h)
+            XCTAssert(object == expected)
+            let representation = try object.asStructuredData()
+            XCTAssert(representation == structuredData)
+//            XCTAssert(object.a == expected.a)
+//            XCTAssert(object.b == expected.b)
+//            XCTAssert(object.c == expected.c)
+//            XCTAssert(object.d == expected.d)
+//            XCTAssert(object.e == expected.e)
+//            XCTAssert(object.f == expected.f)
+//            XCTAssert(object.h == expected.h)
         } catch {
             XCTFail(String(error))
         }
