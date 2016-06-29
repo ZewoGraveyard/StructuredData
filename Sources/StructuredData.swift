@@ -28,6 +28,7 @@ public enum StructuredDataError: ErrorProtocol {
     case incompatibleType
     case notStructuredDataInitializable(Any.Type)
     case notStructuredDataRepresentable(Any.Type)
+    case notStructuredDataDictionaryKeyInitializable(Any.Type)
     case notStructuredDataDictionaryKeyRepresentable(Any.Type)
     case cannotInitialize(type: Any.Type, from: Any.Type)
 }

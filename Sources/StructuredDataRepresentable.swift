@@ -40,8 +40,9 @@ extension StructuredDataRepresentable {
 
 extension StructuredDataFallibleRepresentable {
     func asStructuredData() throws -> StructuredData {
-        var dictionary = [String : StructuredData]()
-        for property in try properties(self) {
+        let properties = try Reflection.properties(self)
+        var dictionary = [String : StructuredData](minimumCapacity: properties.count)
+        for property in properties {
             guard let representable = property.value as? StructuredDataFallibleRepresentable else {
                 throw StructuredDataError.notStructuredDataRepresentable(property.value.dynamicType)
             }
@@ -142,22 +143,20 @@ extension Optional : StructuredDataFallibleRepresentable {
 extension Array : StructuredDataFallibleRepresentable {
     public func asStructuredData() throws -> StructuredData {
         var array: [StructuredData] = []
-        
+        array.reserveCapacity(count)
         for element in self {
             guard let representable = element as? StructuredDataFallibleRepresentable else {
                 throw StructuredDataError.notStructuredDataRepresentable(Element.self)
             }
             array.append(try representable.asStructuredData())
         }
-        
         return .array(array)
     }
 }
 
 extension Dictionary : StructuredDataFallibleRepresentable {
     public func asStructuredData() throws -> StructuredData {
-        var dictionary: [String: StructuredData] = [:]
-        
+        var dictionary = [String: StructuredData](minimumCapacity: count)
         for (key, value) in self {
             guard let representable = value as? StructuredDataFallibleRepresentable else {
                 throw StructuredDataError.notStructuredDataRepresentable(Value.self)
@@ -167,7 +166,6 @@ extension Dictionary : StructuredDataFallibleRepresentable {
             }
             dictionary[key.structuredDataDictionaryKey] = try representable.asStructuredData()
         }
-        
         return .dictionary(dictionary)
     }
 }

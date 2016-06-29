@@ -33,7 +33,15 @@ extension StructuredDataInitializable {
             guard let initializable = property.type as? StructuredDataInitializable.Type else {
                 throw StructuredDataError.notStructuredDataInitializable(property.type)
             }
-            return try initializable.init(structuredData: dictionary[property.key] ?? .null)
+            switch dictionary[property.key] ?? .null {
+            case .null:
+                guard let nilLiteralConvertible = property.type as? NilLiteralConvertible.Type else {
+                    throw Reflection.Error.requiredValueMissing(key: property.key)
+                }
+                return nilLiteralConvertible.init(nilLiteral: ())
+            case let x:
+                return try initializable.init(structuredData: x)
+            }
         }
     }
 }
@@ -104,7 +112,22 @@ extension Array : StructuredDataInitializable {
         guard let initializable = Element.self as? StructuredDataInitializable.Type else {
             throw StructuredDataError.notStructuredDataInitializable(Element.self)
         }
-        self = try array.map { try initializable.init(structuredData: $0) as! Element }
+        var this = Array()
+        this.reserveCapacity(array.count)
+        for element in array {
+            try this.append(initializable.init(structuredData: element) as! Element)
+        }
+        self = this
+    }
+}
+
+public protocol StructuredDataDictionaryKeyInitializable {
+    init(structuredDataDictionaryKey: String)
+}
+
+extension String: StructuredDataDictionaryKeyInitializable {
+    public init(structuredDataDictionaryKey: String) {
+        self = structuredDataDictionaryKey
     }
 }
 
@@ -113,16 +136,16 @@ extension Dictionary : StructuredDataInitializable {
         guard case .dictionary(let dictionary) = structuredData else {
             throw StructuredDataError.cannotInitialize(type: Dictionary.self, from: try structuredData.get().dynamicType)
         }
-        guard Key.self is String.Type else {
-            throw StructuredDataError.notStructuredDataInitializable(self.dynamicType)
+        guard let keyInitializable = Key.self as? StructuredDataDictionaryKeyInitializable.Type else {
+            throw StructuredDataError.notStructuredDataDictionaryKeyInitializable(self.dynamicType)
         }
-        guard let initializable = Value.self as? StructuredDataInitializable.Type else {
+        guard let valueInitializable = Value.self as? StructuredDataInitializable.Type else {
             throw StructuredDataError.notStructuredDataInitializable(Element.self)
         }
-        self = try dictionary.reduce([:]) {
-            var dictionary = $0
-            dictionary[$1.key as! Key] = try initializable.init(structuredData: $1.value) as? Value
-            return dictionary
+        var this = Dictionary(minimumCapacity: dictionary.count)
+        for (key, value) in dictionary {
+            this[keyInitializable.init(structuredDataDictionaryKey: key) as! Key] = try valueInitializable.init(structuredData: value) as? Value
         }
+        self = this
     }
 }

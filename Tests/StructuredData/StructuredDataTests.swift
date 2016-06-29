@@ -1,5 +1,6 @@
 import XCTest
 @testable import StructuredData
+import Reflection
 
 let boolData: StructuredData = true
 let intData: StructuredData = 1
@@ -265,15 +266,17 @@ class StructuredDataTests: XCTestCase {
             XCTAssert(object == expected)
             let representation = try object.asStructuredData()
             XCTAssert(representation == structuredData)
-//            XCTAssert(object.a == expected.a)
-//            XCTAssert(object.b == expected.b)
-//            XCTAssert(object.c == expected.c)
-//            XCTAssert(object.d == expected.d)
-//            XCTAssert(object.e == expected.e)
-//            XCTAssert(object.f == expected.f)
-//            XCTAssert(object.h == expected.h)
         } catch {
             XCTFail(String(error))
+        }
+        
+        do {
+            let _ = try Object(structuredData: .dictionary([:]))
+            XCTFail()
+        } catch Reflection.Error.requiredValueMissing(key: let key) {
+            XCTAssert(key == "b")
+        } catch {
+            XCTFail()
         }
     }
     
