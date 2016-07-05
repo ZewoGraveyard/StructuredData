@@ -33,9 +33,8 @@ public enum StructuredDataError: ErrorProtocol {
     case cannotInitialize(type: Any.Type, from: Any.Type)
 }
 
-protocol StructuredDataConvertible : StructuredDataInitializable, StructuredDataFallibleRepresentable {}
-
 // MARK: Parser/Serializer Protocols
+
 public protocol StructuredDataParser {
     func parse(_ data: Data) throws -> StructuredData
 }
@@ -51,6 +50,7 @@ public protocol StructuredDataSerializer {
 }
 
 // MARK: Initializers
+
 extension StructuredData {
     public init(_ value: StructuredDataRepresentable) {
         self = value.structuredData
@@ -120,6 +120,7 @@ extension StructuredData {
 }
 
 // MARK: Type Inference
+
 extension StructuredData {
     public static func infer<T: StructuredDataRepresentable>(_ value: T?) -> StructuredData {
         return StructuredData(value)
@@ -171,6 +172,7 @@ extension StructuredData {
 }
 
 // MARK: Getters/Setters
+
 extension StructuredData {
     public func get<T>() throws -> T {
         switch self {
@@ -233,6 +235,7 @@ extension StructuredData {
 }
 
 // MARK: Subscripts
+
 extension StructuredData {
     public subscript(index: Int) -> StructuredData? {
         get {
@@ -272,6 +275,7 @@ extension StructuredData {
 }
 
 // MARK: is<Type>
+
 extension StructuredData {
     public var isBool: Bool {
         if case .bool = self {
@@ -324,6 +328,7 @@ extension StructuredData {
 }
 
 // MARK: <type>Value
+
 extension StructuredData {
     public var boolValue: Bool? {
         return try? get()
@@ -355,6 +360,7 @@ extension StructuredData {
 }
 
 // MARK: as<type>
+
 extension StructuredData {
     public func asBool(converting: Bool = false) throws -> Bool {
         guard converting else {
@@ -545,6 +551,7 @@ extension StructuredData {
 }
 
 // MARK: Equatable
+
 extension StructuredData: Equatable {}
 
 public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
@@ -562,6 +569,7 @@ public func ==(lhs: StructuredData, rhs: StructuredData) -> Bool {
 }
 
 // MARK: Literal Convertibles
+
 extension StructuredData: NilLiteralConvertible {
     public init(nilLiteral value: Void) {
         self = .null
@@ -629,6 +637,7 @@ extension StructuredData: DictionaryLiteralConvertible {
 }
 
 // MARK: CustomStringConvertible
+
 extension StructuredData: CustomStringConvertible {
     public var description: String {
         var indentLevel = 0

@@ -24,22 +24,8 @@
 
 import Reflection
 
-public protocol StructuredDataFallibleRepresentable {
-    func asStructuredData() throws -> StructuredData
-}
-
-public protocol StructuredDataRepresentable: StructuredDataFallibleRepresentable {
-    var structuredData: StructuredData { get }
-}
-
-extension StructuredDataRepresentable {
-    public func asStructuredData() throws -> StructuredData {
-        return structuredData
-    }
-}
-
 extension StructuredDataFallibleRepresentable {
-    func asStructuredData() throws -> StructuredData {
+    public func asStructuredData() throws -> StructuredData {
         let properties = try Reflection.properties(self)
         var dictionary = [String : StructuredData](minimumCapacity: properties.count)
         for property in properties {
