@@ -153,7 +153,7 @@ class StructuredDataTests: XCTestCase {
         let optionalInt: Int? = nil
         let optionalDouble: Double? = nil
         let optionalString: String? = nil
-        let optionalData: Data? = nil
+        let optionalData: C7.Data? = nil
         let optionalArray: [String]? = nil
         let optionalArrayOfOptional: [String?]? = nil
         let optionalDictionary: [String: String]? = nil
@@ -163,7 +163,7 @@ class StructuredDataTests: XCTestCase {
         let int: Int = 1
         let double: Double = 1.5
         let string: String = "string"
-        let data: Data = [0]
+        let data: C7.Data = [0]
         let array: [String] = ["foo"]
         let arrayOfOptional: [String?] = [nil]
         let dictionary: [String: String] = ["foo": "bar"]
