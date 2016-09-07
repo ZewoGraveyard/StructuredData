@@ -516,13 +516,13 @@ extension StructuredData {
             return value
 
         case .data(let value):
-            return String(value)
+            return (try? String(data: value)) ?? String(describing: value)
 
         case .array(let value):
-            return String(value)
+            return String(describing: value)
 
         case .dictionary(let value):
-            return String(value)
+            return String(describing: value)
 
         case .null:
             return "null"
@@ -649,7 +649,7 @@ extension StructuredData: ExpressibleByStringInterpolation {
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
-        self = .string(String(expr))
+        self = .string(String(describing: expr))
     }
 }
 
@@ -766,7 +766,7 @@ extension StructuredData: CustomStringConvertible {
 
         func indent() -> String {
             let spaceCount = indentLevel * 4
-            return String(repeating: Character(" "), count: spaceCount)
+            return String(repeating: " ", count: spaceCount)
         }
 
         return serialize(self)
